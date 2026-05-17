@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Syne:wght@700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-background text-textMain font-body antialiased;
+    background-color: #080c14;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading text-textMain;
+  }
+
+  code, pre {
+    @apply font-code;
+  }
+}
+
+/* Custom Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #080c14;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e2d45;
+  border-radius: 4px;
+  border: 2px solid #080c14;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00f5c4;
+}
+
+/* Premium Background Grid Lines Effect */
+.bg-grid-lines {
+  background-size: 60px 60px;
+  background-image: 
+    linear-gradient(to right, rgba(30, 45, 69, 0.15) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(30, 45, 69, 0.15) 1px, transparent 1px);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.bg-grid-lines::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 50% 50%, transparent 10%, #080c14 90%);
+  pointer-events: none;
+}
+
+/* Glassmorphism Card Style */
+.glass-card {
+  background: rgba(13, 19, 33, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(30, 45, 69, 0.55);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  border-color: rgba(0, 245, 196, 0.35);
+  box-shadow: 0 8px 32px 0 rgba(0, 245, 196, 0.05);
+}
+
+/* Glowing text effects */
+.text-glow-cyan {
+  text-shadow: 0 0 10px rgba(0, 245, 196, 0.4);
+}
+
+.text-glow-purple {
+  text-shadow: 0 0 10px rgba(124, 109, 250, 0.4);
+}
+
+/* Code block adjustments for highlight.js */
+pre code.hljs {
+  padding: 0 !important;
+  background: transparent !important;
+}
