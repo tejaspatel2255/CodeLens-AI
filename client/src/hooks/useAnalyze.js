@@ -6,7 +6,7 @@ export const useAnalyze = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const analyze = async (code) => {
+  const analyze = async (code, language) => {
     if (!code || !code.trim()) {
       setError('Please provide code to analyze.');
       return null;
@@ -22,7 +22,7 @@ export const useAnalyze = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ code, sessionId }),
+        body: JSON.stringify({ code, sessionId, language }),
       });
 
       if (!response.ok) {

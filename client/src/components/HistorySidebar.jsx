@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, ChevronRight, Terminal, Inbox } from 'lucide-react';
+import { X, Calendar, ChevronRight, Terminal, Inbox, Trash2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function HistorySidebar() {
@@ -10,12 +10,13 @@ export default function HistorySidebar() {
     setSidebarOpen, 
     history, 
     historyLoading, 
-    setCurrentAnalysis 
+    setCurrentAnalysis,
+    deleteHistoryItem 
   } = useApp();
   
   const navigate = useNavigate();
 
-  // Navigation and detail view trigger
+  // Navigation and detail view trigger (R in CRUD)
   const handleItemClick = (item) => {
     // Supabase returns stored JSONB data. Depending on details, ensure standard parses.
     const formattedItem = {
@@ -97,7 +98,7 @@ export default function HistorySidebar() {
             className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-[360px] bg-surface/95 border-l border-border/80 backdrop-blur-xl flex flex-col shadow-2xl text-left"
           >
             {/* Sidebar Header */}
-            <div className="p-4 border-b border-border/85 flex items-center justify-between bg-surface">
+            <div className="p-4 border-b border-border/85 flex items-center justify-between bg-surface bg-opacity-70">
               <div className="flex items-center gap-2">
                 <Terminal className="h-4.5 w-4.5 text-accentCyan" />
                 <span className="font-heading text-sm font-extrabold uppercase tracking-widest bg-gradient-to-r from-accentCyan to-accentPurple bg-clip-text text-transparent">
@@ -106,7 +107,7 @@ export default function HistorySidebar() {
               </div>
               <button
                 onClick={() => setSidebarOpen(false)}
-                className="p-1.5 rounded-lg border border-border/50 text-mutedMain hover:text-textMain hover:bg-surface2 transition-all"
+                className="p-1.5 rounded-lg border border-border/50 text-mutedMain hover:text-textMain hover:bg-surface2 transition-all cursor-pointer"
                 aria-label="Close sidebar"
               >
                 <X className="h-4 w-4" />
@@ -124,33 +125,54 @@ export default function HistorySidebar() {
                 </div>
               ) : history && history.length > 0 ? (
                 history.map((item) => (
-                  <button
+                  <div
                     key={item.id}
                     onClick={() => handleItemClick(item)}
-                    className="w-full text-left glass-card rounded-xl border border-border/50 bg-surface2/30 hover:bg-surface2/70 p-4 transition-all duration-300 group flex flex-col gap-2 relative shadow-sm"
+                    className="w-full text-left glass-card rounded-xl border border-border/50 bg-surface2/30 hover:bg-surface2/70 p-4 transition-all duration-300 group flex flex-col gap-2.5 relative shadow-sm cursor-pointer select-none"
                   >
                     {/* Floating select indicator */}
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-accentCyan">
                       <ChevronRight className="h-4.5 w-4.5" />
                     </div>
 
-                    <div className="flex justify-between items-center pr-4">
+                    <div className="flex justify-between items-center pr-2">
                       {/* Language Badge */}
                       <span className="px-2 py-0.5 rounded border border-accentCyan/20 bg-accentCyan/5 text-[9px] uppercase font-code tracking-wider text-accentCyan">
                         {item.language || 'Plain Text'}
                       </span>
-                      {/* Created Date */}
-                      <span className="text-[10px] text-mutedMain flex items-center gap-1 font-medium">
-                        <Calendar className="h-2.5 w-2.5" />
-                        {formatTimeAgo(item.created_at)}
-                      </span>
+                      
+                      <div className="flex items-center gap-2">
+                        {/* Created Date */}
+                        <span className="text-[10px] text-mutedMain flex items-center gap-1 font-medium">
+                          <Calendar className="h-2.5 w-2.5" />
+                          {formatTimeAgo(item.created_at)}
+                        </span>
+
+                        {/* Interactive Delete Button (D in CRUD) */}
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation(); // Avoid triggering card selection click!
+                            if (window.confirm("Are you sure you want to permanently delete this execution log from your history?")) {
+                              try {
+                                await deleteHistoryItem(item.id);
+                              } catch (err) {
+                                alert(err.message || "Unable to delete history log.");
+                              }
+                            }
+                          }}
+                          className="p-1 rounded hover:bg-accentRed/15 text-mutedMain/50 hover:text-accentRed transition-all cursor-pointer z-30"
+                          title="Delete Session Log"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     </div>
 
                     {/* Shortened Code Summary */}
-                    <p className="text-xs text-textMain/85 leading-relaxed font-body pr-4 line-clamp-2">
+                    <p className="text-xs text-textMain/85 leading-relaxed font-body pr-5 line-clamp-2">
                       {item.summary || (item.original_code ? item.original_code.substring(0, 60) + '...' : 'No Summary available')}
                     </p>
-                  </button>
+                  </div>
                 ))
               ) : (
                 // Empty History state
@@ -170,7 +192,7 @@ export default function HistorySidebar() {
 
             {/* Sidebar Footer */}
             <div className="p-4 border-t border-border/80 bg-surface/50 text-[10px] text-mutedMain text-center uppercase tracking-wider font-semibold">
-              CodeLens AI • Session Database
+              TraceVerse AI • Session Database
             </div>
           </motion.div>
         </>

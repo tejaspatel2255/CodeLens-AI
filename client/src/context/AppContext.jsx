@@ -4,20 +4,49 @@ const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
   const [sessionId, setSessionId] = useState('');
+  const [user, setUser] = useState(null);
   const [currentAnalysis, setCurrentAnalysis] = useState(null);
   const [history, setHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Initialize Session ID
+  // Helper: Get active API URL
+  const getApiUrl = () => import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+  // Initialize Session ID and Custom JWT Auth Listening
   useEffect(() => {
-    let session = localStorage.getItem('codelens_session');
-    if (!session) {
-      session = crypto.randomUUID();
-      localStorage.setItem('codelens_session', session);
+    // 1. Fetch initial local storage guest session as fallback
+    let guestSession = localStorage.getItem('codelens_session');
+    if (!guestSession) {
+      guestSession = crypto.randomUUID();
+      localStorage.setItem('codelens_session', guestSession);
     }
-    setSessionId(session);
+    setSessionId(guestSession);
+
+    // 2. Verify active JWT token session on start
+    const token = localStorage.getItem('codelens_auth_token');
+    if (token) {
+      fetch(`${getApiUrl()}/api/auth/me`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Session expired or invalid");
+        return res.json();
+      })
+      .then(data => {
+        if (data.user) {
+          setUser(data.user);
+          setSessionId(data.user.id);
+        }
+      })
+      .catch(err => {
+        console.warn("Auth Auto-login Check failed:", err.message);
+        localStorage.removeItem('codelens_auth_token');
+      });
+    }
   }, []);
 
   // Fetch History from API
@@ -28,8 +57,15 @@ export const AppProvider = ({ children }) => {
     setHistoryLoading(true);
     setHistoryError(null);
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${apiUrl}/api/history/${activeSession}`);
+      const token = localStorage.getItem('codelens_auth_token');
+      const headers = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${getApiUrl()}/api/history/${activeSession}`, {
+        headers
+      });
       
       if (!response.ok) {
         throw new Error('Failed to retrieve history logs');
@@ -45,11 +81,42 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  // Delete History Item
+  const deleteHistoryItem = async (analysisId) => {
+    try {
+      const token = localStorage.getItem('codelens_auth_token');
+      const headers = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${getApiUrl()}/api/history/${analysisId}`, {
+        method: 'DELETE',
+        headers
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || 'Failed to delete history item');
+      }
+
+      // Filter out of local memory state to update UI instantly!
+      setHistory(prev => prev.filter(item => item.id !== analysisId));
+
+      // If the currently viewed analysis is the deleted one, clear it from view!
+      setCurrentAnalysis(prev => prev && prev.id === analysisId ? null : prev);
+      
+      return true;
+    } catch (err) {
+      console.error('Delete History Item Error:', err);
+      throw err;
+    }
+  };
+
   // Fetch a shared analysis by its DB row ID
   const fetchAnalysisById = async (analysisId) => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${apiUrl}/api/history/detail/${analysisId}`);
+      const response = await fetch(`${getApiUrl()}/api/history/detail/${analysisId}`);
       
       if (!response.ok) {
         throw new Error('Shared analysis not found or server is offline');
@@ -57,7 +124,6 @@ export const AppProvider = ({ children }) => {
       
       const data = await response.json();
       
-      // Parse JSONB structures if they come as strings, but supabase-js generally returns parsed objects
       const formattedAnalysis = {
         id: data.id,
         language: data.language,
@@ -78,6 +144,26 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  // Set active user session
+  const authenticateUser = (token, userData) => {
+    localStorage.setItem('codelens_auth_token', token);
+    setUser(userData);
+    setSessionId(userData.id);
+  };
+
+  // Sign out user cleanly
+  const logout = () => {
+    localStorage.removeItem('codelens_auth_token');
+    setUser(null);
+    // Revert to local storage guest session on sign out
+    let localGuest = localStorage.getItem('codelens_session');
+    if (!localGuest) {
+      localGuest = crypto.randomUUID();
+      localStorage.setItem('codelens_session', localGuest);
+    }
+    setSessionId(localGuest);
+  };
+
   // Trigger history fetch when session becomes active
   useEffect(() => {
     if (sessionId) {
@@ -89,6 +175,9 @@ export const AppProvider = ({ children }) => {
     <AppContext.Provider
       value={{
         sessionId,
+        user,
+        logout,
+        authenticateUser,
         currentAnalysis,
         setCurrentAnalysis,
         history,
@@ -97,6 +186,7 @@ export const AppProvider = ({ children }) => {
         historyError,
         fetchHistory,
         fetchAnalysisById,
+        deleteHistoryItem,
         sidebarOpen,
         setSidebarOpen
       }}

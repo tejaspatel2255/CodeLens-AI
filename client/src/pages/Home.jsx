@@ -107,7 +107,7 @@ export default function Home() {
               {/* Spectacular Headline */}
               <motion.h1
                 variants={itemVariants}
-                className="font-heading text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl leading-none text-textMain"
+                className="font-heading text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl lg:text-5xl leading-tight text-textMain"
               >
                 Understand Code <br />
                 <span className="bg-gradient-to-r from-accentCyan via-textMain to-accentPurple bg-clip-text text-transparent">
@@ -263,28 +263,6 @@ export default function Home() {
 
         </div>
 
-        {/* University trust header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="mt-20 pt-8 border-t border-border/30 text-center relative z-10"
-        >
-          <span className="text-[9px] font-heading font-black uppercase tracking-[0.3em] text-mutedMain/60 block mb-6">
-            Loved by students at top institutions
-          </span>
-          <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6 opacity-45 grayscale hover:grayscale-0 hover:opacity-80 transition-all duration-300">
-            {['Stanford', 'MIT', 'Caltech', 'Harvard', 'Oxford'].map((uni, idx) => (
-              <span 
-                key={idx} 
-                className="font-heading text-base sm:text-lg font-black tracking-widest text-textMain select-none uppercase hover:text-accentCyan transition-colors cursor-default"
-              >
-                {uni}
-              </span>
-            ))}
-          </div>
-        </motion.div>
 
         {/* Feature showcase grid */}
         <div className="mt-28 pb-16">
@@ -350,7 +328,7 @@ export default function Home() {
 
       {/* Footer copyright */}
       <footer className="relative z-10 w-full border-t border-border/30 py-6 text-center text-[10px] text-mutedMain/50 uppercase tracking-widest font-semibold bg-background">
-        © 2026 CodeLens AI. Built for students and developers.
+        © 2026 TraceVerse AI. Built for students and developers.
       </footer>
     </div>
   );

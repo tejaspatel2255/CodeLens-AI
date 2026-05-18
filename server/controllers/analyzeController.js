@@ -1,8 +1,9 @@
 import { supabase } from '../lib/supabase.js';
+import { formatGroqApiError } from '../lib/groqErrors.js';
 import systemPrompt from '../prompts/systemPrompt.js';
 
 export const analyzeCode = async (req, res) => {
-  const { code, sessionId } = req.body;
+  const { code, sessionId, language } = req.body;
 
   if (!code || typeof code !== 'string' || !code.trim()) {
     return res.status(400).json({ error: 'Code content cannot be empty' });
@@ -12,9 +13,11 @@ export const analyzeCode = async (req, res) => {
     return res.status(400).json({ error: 'Session ID is required' });
   }
 
-  const groqApiKey = process.env.GROQ_API_KEY;
+  const groqApiKey = process.env.GROQ_API_KEY?.trim();
   if (!groqApiKey) {
-    return res.status(500).json({ error: 'GROQ_API_KEY is not configured on the server' });
+    return res.status(500).json({
+      error: 'GROQ_API_KEY is not configured. Add it to the root .env file (see .env.example).',
+    });
   }
 
   // Create AbortController for a 30-second timeout
@@ -32,9 +35,10 @@ export const analyzeCode = async (req, res) => {
       },
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
+        response_format: { type: "json_object" },
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: code }
+          { role: "user", content: `Language Context: ${language || 'Auto-detect'}\n\nCode to analyze:\n${code}` }
         ],
         temperature: 0.3,
         max_tokens: 4000
@@ -46,7 +50,9 @@ export const analyzeCode = async (req, res) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Groq API returned HTTP ${response.status}: ${errorText}`);
+      const friendlyMessage = formatGroqApiError(response.status, errorText);
+      const statusCode = response.status === 401 ? 401 : 502;
+      return res.status(statusCode).json({ error: friendlyMessage });
     }
 
     const data = await response.json();
@@ -56,8 +62,16 @@ export const analyzeCode = async (req, res) => {
       throw new Error('Groq returned an empty response');
     }
 
-    // Clean text by stripping JSON markdown formatting
-    let cleanText = assistantMessage.replace(/```json|```/g, "").trim();
+    // Clean text by isolating JSON boundaries (from the first '{' to the last '}')
+    let cleanText = assistantMessage.trim();
+    const firstBrace = cleanText.indexOf('{');
+    const lastBrace = cleanText.lastIndexOf('}');
+    
+    if (firstBrace !== -1 && lastBrace !== -1) {
+      cleanText = cleanText.substring(firstBrace, lastBrace + 1);
+    } else {
+      cleanText = cleanText.replace(/```json|```/g, "").trim();
+    }
     
     let parsedResult;
     try {

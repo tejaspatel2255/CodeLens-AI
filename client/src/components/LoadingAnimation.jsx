@@ -52,7 +52,7 @@ export default function LoadingAnimation() {
 
         {/* AI Branding */}
         <span className="font-heading text-xs font-bold uppercase tracking-widest text-accentCyan mb-2 flex items-center gap-1.5 justify-center">
-          <Sparkles className="h-3 w-3 animate-pulse" /> CodeLens AI Explainer
+          <Sparkles className="h-3 w-3 animate-pulse" /> TraceVerse AI Explainer
         </span>
 
         {/* Message crossfader */}
@@ -87,7 +87,7 @@ export default function LoadingAnimation() {
 
         {/* Action description info */}
         <p className="text-xs text-mutedMain/70 mt-6 max-w-[280px]">
-          Our LLM model (Llama-3.3-70b) is breaking down lines of code and building memory traces...
+          Analyzing syntax architecture and constructing step-by-step call stacks...
         </p>
       </div>
     </div>

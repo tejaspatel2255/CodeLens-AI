@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Cpu, Lightbulb, Copy, Check, Sparkles } from 'lucide-react';
+import { Cpu, Lightbulb, Copy, Check, Sparkles, Volume2, VolumeX } from 'lucide-react';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/tokyo-night-dark.css';
 
@@ -20,7 +20,56 @@ const cardVariants = {
 export default function StepCard({ stepData, language, index }) {
   const { step, line, title, explanation, backend, analogy } = stepData;
   const [copied, setCopied] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const codeRef = useRef(null);
+
+  // Stop any active narration when component unmounts
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, []);
+
+  const handleSpeak = () => {
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+
+    // Cancel other playing sounds
+    window.speechSynthesis.cancel();
+
+    if (!explanation) return;
+
+    // Compose custom natural readout flow
+    let speakText = `Step ${step}. ${title || 'Execution step details'}. ${explanation.replace(/[{}[\]"']/g, '').trim()}`;
+    if (analogy) {
+      speakText += `. To understand this, think of it like: ${analogy.replace(/[{}[\]"']/g, '').trim()}`;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(speakText);
+    
+    // Choose natural-sounding English voice if available
+    const voices = window.speechSynthesis.getVoices();
+    const preferredVoice = voices.find(
+      (v) =>
+        v.lang.startsWith('en-') &&
+        (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Microsoft'))
+    );
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+    }
+
+    utterance.rate = 1.05; // Slightly faster for student pacing
+    utterance.pitch = 1.0;
+
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
+    setIsSpeaking(true);
+    window.speechSynthesis.speak(utterance);
+  };
 
   // Apply highlight.js syntax coloring on load/render
   useEffect(() => {
@@ -57,7 +106,7 @@ export default function StepCard({ stepData, language, index }) {
       <div className="flex items-center justify-between mb-4 lg:mb-2">
         
         {/* Step Indicator Badge */}
-        <div className="flex items-center gap-3 lg:absolute lg:-left-5.5 lg:top-6.5 lg:z-10">
+        <div className="flex items-center gap-3 lg:absolute lg:-left-[18px] lg:top-[24px] lg:z-10">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-accentCyan via-background to-accentPurple p-[1px] shadow-[0_0_15px_rgba(0,245,196,0.15)] group-hover:scale-105 group-hover:shadow-[0_0_20px_rgba(0,245,196,0.35)] transition-all duration-300">
             <div className="flex h-full w-full items-center justify-center rounded-[10px] bg-background font-heading text-xs font-black text-accentCyan group-hover:text-accentPurple transition-colors duration-300">
               {step}
@@ -105,9 +154,34 @@ export default function StepCard({ stepData, language, index }) {
       {/* Step Info Content */}
       <div className="space-y-4 font-body">
         <div>
-          <h5 className="text-[10px] uppercase font-bold tracking-widest text-mutedMain/80 mb-1.5">
-            What happens
-          </h5>
+          <div className="flex items-center justify-between mb-1.5 flex-wrap gap-2">
+            <h5 className="text-[10px] uppercase font-bold tracking-widest text-mutedMain/80">
+              What happens
+            </h5>
+            {/* Contextual Speak Button */}
+            <button
+              onClick={handleSpeak}
+              className={`p-1.5 rounded-lg border text-mutedMain hover:text-textMain hover:bg-surface2 transition-all cursor-pointer flex items-center gap-1.5 ${
+                isSpeaking 
+                  ? 'bg-accentPurple/20 border-accentPurple text-accentPurple shadow-[0_0_12px_rgba(124,109,250,0.15)]' 
+                  : 'border-transparent bg-transparent hover:border-border/40'
+              }`}
+              title={isSpeaking ? "Stop voice narration" : "Listen to step narration & analogy"}
+            >
+              {isSpeaking ? (
+                <>
+                  <Volume2 className="h-3.5 w-3.5 text-accentPurple" />
+                  <span className="flex items-center gap-0.5 px-0.5">
+                    <span className="voice-wave-bar voice-wave-bar-1 text-accentPurple"></span>
+                    <span className="voice-wave-bar voice-wave-bar-2 text-accentPurple"></span>
+                    <span className="voice-wave-bar voice-wave-bar-3 text-accentPurple"></span>
+                  </span>
+                </>
+              ) : (
+                <VolumeX className="h-3.5 w-3.5" />
+              )}
+            </button>
+          </div>
           <p className="text-xs sm:text-sm text-textMain/75 leading-relaxed font-body">
             {explanation}
           </p>

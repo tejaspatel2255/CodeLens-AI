@@ -1,20 +1,32 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Clipboard, Trash2, Copy, FileCode, Check } from 'lucide-react';
+import { FileCode, Clipboard, Copy, Trash2, Check, Sparkles, Terminal } from 'lucide-react';
+import { useApp } from '../context/AppContext';
+import { useNavigate } from 'react-router-dom';
 
 const LANGUAGE_PILLS = [
-  { name: 'JavaScript', ext: 'js', color: 'text-yellow-400 bg-yellow-400/15 border-yellow-400/30' },
-  { name: 'Python', ext: 'py', color: 'text-emerald-400 bg-emerald-400/15 border-emerald-400/30' },
+  { name: 'C', ext: 'c', color: 'text-red-500 bg-red-500/15 border-red-500/30' },
+  { name: 'C++', ext: 'cpp', color: 'text-rose-400 bg-rose-400/15 border-rose-400/30' },
   { name: 'Java', ext: 'java', color: 'text-orange-400 bg-orange-400/15 border-orange-400/30' },
-  { name: 'C++', ext: 'cpp', color: 'text-sky-400 bg-sky-400/15 border-sky-400/30' },
-  { name: 'TypeScript', ext: 'ts', color: 'text-blue-400 bg-blue-400/15 border-blue-400/30' }
+  { name: 'Python', ext: 'py', color: 'text-yellow-400 bg-yellow-400/15 border-yellow-400/30' },
+  { name: 'JavaScript', ext: 'js', color: 'text-green-400 bg-green-400/15 border-green-400/30' }
 ];
 
-export default function CodeEditor({ onAnalyze, loading }) {
+export default function CodeEditor({ onAnalyze, loading, activeLine }) {
+  const { currentAnalysis, setCurrentAnalysis, user } = useApp();
+  const navigate = useNavigate();
   const [code, setCode] = useState('');
   const [copied, setCopied] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [detectedLang, setDetectedLang] = useState('');
+  const [manualLang, setManualLang] = useState('');
   const textareaRef = useRef(null);
+
+  // Auto-reload code when a history item is selected for re-use
+  useEffect(() => {
+    if (currentAnalysis && currentAnalysis.original_code) {
+      setCode(currentAnalysis.original_code);
+    }
+  }, [currentAnalysis]);
 
   // Line count generation for side indicator
   const lineCount = code.split('\n').length;
@@ -28,32 +40,32 @@ export default function CodeEditor({ onAnalyze, loading }) {
     }
 
     const lowerCode = code.toLowerCase();
-    
-    // C++ Detection
-    if (lowerCode.includes('#include') || lowerCode.includes('std::') || lowerCode.includes('cout <<') || lowerCode.includes('cin >>')) {
+
+    // C++ Detection (std:: namespace, streams cout/cin)
+    if ((lowerCode.includes('#include') && (lowerCode.includes('std::') || lowerCode.includes('cout') || lowerCode.includes('cin'))) || lowerCode.includes('using namespace std')) {
       setDetectedLang('C++');
       return;
     }
-    
+
+    // C Detection (printf, scanf, standard procedurals)
+    if (lowerCode.includes('#include') || lowerCode.includes('printf(') || lowerCode.includes('scanf(') || lowerCode.includes('int main(') || lowerCode.includes('void main(')) {
+      setDetectedLang('C');
+      return;
+    }
+
     // Java Detection
     if (lowerCode.includes('public class') || lowerCode.includes('system.out.print') || lowerCode.includes('public static void main')) {
       setDetectedLang('Java');
       return;
     }
-    
+
     // Python Detection
     if (lowerCode.includes('def ') || lowerCode.includes('elif ') || lowerCode.includes('import pandas') || lowerCode.includes('print(') && !lowerCode.includes('console.log')) {
-      // Small refinement to ensure Python doesn't trigger for console.log print references
       setDetectedLang('Python');
       return;
     }
-    
-    // TypeScript Detection
-    if (lowerCode.includes('interface ') || lowerCode.includes(': string') || lowerCode.includes(': number') || lowerCode.includes('as ') && (lowerCode.includes('const ') || lowerCode.includes('let '))) {
-      setDetectedLang('TypeScript');
-      return;
-    }
-    
+
+
     // Default fallback to JavaScript if common keywords are present
     if (lowerCode.includes('const ') || lowerCode.includes('let ') || lowerCode.includes('console.log') || lowerCode.includes('function ')) {
       setDetectedLang('JavaScript');
@@ -63,12 +75,16 @@ export default function CodeEditor({ onAnalyze, loading }) {
     setDetectedLang('');
   }, [code]);
 
+  // Determine active language
+  const activeLang = manualLang || detectedLang || 'JavaScript';
+
   // Clipboard Paste Helper
   const handlePaste = async () => {
     try {
       const text = await navigator.clipboard.readText();
       if (text) {
         setCode(text);
+        setManualLang(''); // Reset manual selection to let auto-detect check it
         showToast("Code pasted successfully!");
       }
     } catch (err) {
@@ -91,13 +107,13 @@ export default function CodeEditor({ onAnalyze, loading }) {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
         if (code.trim() && !loading) {
-          onAnalyze(code);
+          onAnalyze(code, activeLang);
         }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [code, loading, onAnalyze]);
+  }, [code, loading, onAnalyze, activeLang]);
 
   // Drag and Drop files handlers
   const handleDrag = (e) => {
@@ -119,8 +135,7 @@ export default function CodeEditor({ onAnalyze, loading }) {
       const file = e.dataTransfer.files[0];
       const filename = file.name;
       const extension = filename.split('.').pop().toLowerCase();
-      
-      // Support listed extensions
+
       const allowedExtensions = ['js', 'py', 'java', 'cpp', 'c', 'cs', 'ts', 'html', 'css', 'txt'];
       if (!allowedExtensions.includes(extension)) {
         showToast("Unsupported file extension. Try dropping JS, PY, Java, or CPP files.");
@@ -130,6 +145,7 @@ export default function CodeEditor({ onAnalyze, loading }) {
       const reader = new FileReader();
       reader.onload = (event) => {
         setCode(event.target.result);
+        setManualLang(''); // Reset manual selection
         showToast(`Imported ${filename} successfully!`);
       };
       reader.readAsText(file);
@@ -139,7 +155,7 @@ export default function CodeEditor({ onAnalyze, loading }) {
   // Standard toast trigger utility
   const [toastMessage, setToastMessage] = useState('');
   const [toastVisible, setToastVisible] = useState(false);
-  
+
   const showToast = (msg) => {
     setToastMessage(msg);
     setToastVisible(true);
@@ -153,18 +169,17 @@ export default function CodeEditor({ onAnalyze, loading }) {
   }, [toastVisible]);
 
   return (
-    <div 
+    <div
       onDragEnter={handleDrag}
       onDragOver={handleDrag}
       onDragLeave={handleDrag}
       onDrop={handleDrop}
-      className={`relative w-full rounded-2xl border transition-all duration-300 ${
-        dragActive 
-          ? 'border-accentCyan bg-accentCyan/5 shadow-[0_0_25px_rgba(0,245,196,0.15)]' 
-          : code.trim() 
-            ? 'border-accentCyan/45 bg-surface shadow-[0_0_20px_rgba(0,245,196,0.02)] animate-pulse-glow'
+      className={`relative w-full rounded-2xl border transition-all duration-300 ${dragActive
+          ? 'border-accentCyan bg-accentCyan/5 shadow-[0_0_25px_rgba(0,245,196,0.15)]'
+          : code.trim()
+            ? 'border-accentCyan/45 bg-surface shadow-[0_0_20px_rgba(0,245,196,0.02)]'
             : 'border-border bg-surface shadow-2xl'
-      }`}
+        }`}
     >
       {/* Editor Header Tools */}
       <div className="flex items-center justify-between border-b border-border/80 px-4 py-3 bg-surface/50 rounded-t-2xl">
@@ -175,8 +190,16 @@ export default function CodeEditor({ onAnalyze, loading }) {
             <span className="h-3 w-3 rounded-full bg-accentCyan/80 shadow-[0_0_8px_rgba(0,245,196,0.25)]"></span>
           </div>
           <span className="ml-2 font-code text-xs text-mutedMain flex items-center gap-1.5 uppercase tracking-wider">
-            <FileCode className="h-3.5 w-3.5" /> Workspace.{detectedLang ? detectedLang.substring(0,2).toLowerCase() : 'txt'}
+            <FileCode className="h-3.5 w-3.5" /> Workspace.{activeLang ? activeLang.substring(0, 2).toLowerCase() : 'txt'}
           </span>
+          {currentAnalysis && (
+            <span className="ml-2 text-[9px] px-2 py-0.5 rounded-full bg-accentCyan/10 border border-accentCyan/20 text-accentCyan font-sans font-extrabold uppercase tracking-widest flex items-center gap-1 shadow-sm select-none">
+              <span className="relative flex h-1 w-1">
+                <span className="relative inline-flex rounded-full h-1 w-1 bg-accentCyan"></span>
+              </span>
+              UNDERSTANDING MODE
+            </span>
+          )}
         </div>
 
         {/* Action button tools */}
@@ -197,7 +220,7 @@ export default function CodeEditor({ onAnalyze, loading }) {
             {copied ? <Check className="h-4 w-4 text-accentCyan" /> : <Copy className="h-4 w-4" />}
           </button>
           <button
-            onClick={() => { setCode(''); showToast("Cleared workspace."); }}
+            onClick={() => { setCode(''); setManualLang(''); showToast("Cleared workspace."); }}
             disabled={!code.trim()}
             className="p-1.5 rounded-lg text-mutedMain hover:text-accentRed hover:bg-accentRed/10 transition-all disabled:opacity-30 disabled:hover:bg-transparent"
             title="Clear all text"
@@ -217,75 +240,112 @@ export default function CodeEditor({ onAnalyze, loading }) {
         </div>
 
         {/* Text Input Block */}
-        <div className="flex-1 relative pl-4">
-          <textarea
-            ref={textareaRef}
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            placeholder="Paste your code here... supports Javascript, Python, Java, C++, and more. Or drag and drop a source file directly."
-            className="w-full h-full min-h-[368px] bg-transparent text-textMain outline-none resize-none font-code border-0 p-0 focus:ring-0 placeholder:text-mutedMain/45 placeholder:italic leading-6"
-            style={{ tabSize: 4 }}
-          />
+        <div className="flex-1 relative pl-4 select-text">
+          {activeLine ? (
+            <div className="flex flex-col w-full h-full min-h-[368px] bg-transparent text-textMain outline-none resize-none font-code border-0 p-0 leading-6">
+              {code.split('\n').map((lineText, idx) => {
+                // Check if this line is active
+                const isActive = activeLine && lineText.trim() === activeLine.trim();
+                return (
+                  <div
+                    key={idx}
+                    className={`h-6 flex items-center transition-all duration-300 w-full rounded ${
+                      isActive
+                        ? 'bg-accentCyan/15 border-l-2 border-accentCyan text-accentCyan font-bold px-2.5 shadow-[0_0_15px_rgba(0,245,196,0.15)] animate-pulse'
+                        : 'px-2.5 text-textMain/80 hover:bg-surface2/10'
+                    }`}
+                  >
+                    {lineText || ' '}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <textarea
+              ref={textareaRef}
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="Paste your code here... supports C, C++, Java, Python, and JavaScript. Or drag and drop a source file directly."
+              className={`w-full h-full min-h-[368px] bg-transparent text-textMain outline-none resize-none font-code border-0 p-0 focus:ring-0 placeholder:text-mutedMain/45 placeholder:italic leading-6 ${currentAnalysis ? 'cursor-default select-text opacity-95 text-accentCyan/90' : ''}`}
+              readOnly={!!currentAnalysis}
+              style={{ tabSize: 4 }}
+            />
+          )}
         </div>
       </div>
 
       {/* Footer Submit Bar */}
-      <div className="border-t border-border/80 px-4 py-3 bg-surface/50 rounded-b-2xl flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
-        
-        {/* Auto Language Detection Pills */}
+      <div className="border-t border-border/80 px-4 py-3 bg-surface/50 rounded-b-2xl flex flex-col sm:flex-row gap-4 sm:items-center justify-between animate-fade-in">
+
+        {/* Interactive Language Selection Pills */}
         <div className="flex items-center gap-1.5 flex-wrap">
           {LANGUAGE_PILLS.map((pill, pIdx) => {
-            const isMatch = detectedLang === pill.name;
+            const isMatch = activeLang === pill.name;
             return (
-              <span
+              <button
                 key={pIdx}
-                className={`px-2 py-0.5 rounded border text-[9px] font-semibold uppercase tracking-wider transition-all duration-300 ${
-                  isMatch 
-                    ? `${pill.color} shadow-[0_0_12px_rgba(255,255,255,0.03)] scale-105 font-bold`
-                    : 'text-mutedMain/40 border-border/60 bg-transparent'
-                }`}
+                onClick={() => {
+                  setManualLang(pill.name);
+                  showToast(`Selected language: ${pill.name}`);
+                }}
+                className={`px-2.5 py-1 rounded-xl border text-[10px] font-extrabold uppercase tracking-wider transition-all duration-300 cursor-pointer ${isMatch
+                    ? `${pill.color} shadow-[0_0_15px_rgba(255,255,255,0.05)] scale-105 font-black border`
+                    : 'text-mutedMain/40 border-border/40 bg-transparent hover:text-textMain hover:border-border'
+                  }`}
               >
                 {pill.name}
-              </span>
+              </button>
             );
           })}
         </div>
 
-        <button
-          onClick={() => code.trim() && onAnalyze(code)}
-          disabled={loading || !code.trim()}
-          className="relative inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-heading text-sm font-extrabold uppercase tracking-widest text-background bg-accentCyan hover:opacity-90 active:scale-95 disabled:opacity-40 disabled:pointer-events-none transition-all shadow-[0_0_20px_rgba(0,245,196,0.25)] hover:shadow-[0_0_30px_rgba(0,245,196,0.45)]"
-        >
-          {loading ? (
-            <>
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-background" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <span>Analyzing...</span>
-            </>
-          ) : (
-            <>
-              <Play className="h-4 w-4 fill-background" />
-              <span>Analyze Code</span>
-            </>
-          )}
-        </button>
+        {/* Primary Run Action Button */}
+        {currentAnalysis ? (
+          <button
+            onClick={() => {
+              if (!user) {
+                showToast("Sign in required to modify code or run analyses!");
+                setTimeout(() => navigate('/auth?mode=login'), 1200);
+                return;
+              }
+              setCurrentAnalysis(null);
+            }}
+            className="px-6 py-2 rounded-xl bg-surface border border-border/80 text-textMain hover:bg-surface2 hover:text-accentCyan font-heading text-xs font-black uppercase tracking-widest hover:scale-102 hover:shadow-[0_0_15px_rgba(0,245,196,0.05)] active:scale-98 transition-all cursor-pointer flex items-center justify-center gap-2"
+          >
+            <span>🔓 Modify / New Code</span>
+          </button>
+        ) : (
+          <button
+            onClick={() => {
+              if (!user) {
+                showToast("Sign in required to modify code or run analyses!");
+                setTimeout(() => navigate('/auth?mode=login'), 1200);
+                return;
+              }
+              onAnalyze(code, activeLang);
+            }}
+            disabled={loading || !code.trim()}
+            className="px-6 py-2 rounded-xl bg-gradient-to-r from-accentCyan to-accentPurple text-background font-heading text-xs font-black uppercase tracking-widest hover:scale-102 hover:shadow-[0_0_20px_rgba(0,245,196,0.25)] active:scale-98 transition-all disabled:opacity-40 disabled:hover:scale-100 disabled:hover:shadow-none cursor-pointer flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <>
+                <div className="h-4 w-4 border-2 border-background border-t-transparent rounded-full animate-spin" />
+                <span>Analyzing...</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4" />
+                <span>Analyze Code</span>
+              </>
+            )}
+          </button>
+        )}
       </div>
 
-      {/* Floating Drag Overlay */}
-      {dragActive && (
-        <div className="absolute inset-0 bg-background/85 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center border-2 border-dashed border-accentCyan z-10 pointer-events-none transition-all">
-          <FileCode className="h-16 w-16 text-accentCyan animate-bounce" />
-          <p className="mt-4 text-lg font-heading text-textMain">Drop your code file here</p>
-          <p className="text-sm text-mutedMain mt-1">Accepts JS, PY, Java, CPP, TS, and CS files</p>
-        </div>
-      )}
-
-      {/* Floating Toast Notification */}
+      {/* Floating Micro-Toast Notification */}
       {toastVisible && (
-        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 bg-surface2 border border-border px-4 py-2.5 rounded-xl shadow-2xl text-xs font-semibold tracking-wider text-accentCyan z-20 flex items-center gap-2 animate-bounce">
-          <Check className="h-3.5 w-3.5" />
+        <div className="absolute bottom-16 right-4 z-50 bg-background/90 border border-border/80 text-textMain px-3.5 py-1.5 rounded-xl font-heading text-[10px] uppercase font-bold tracking-wider shadow-2xl flex items-center gap-2 backdrop-blur-md animate-fade-in">
+          <Terminal className="h-3.5 w-3.5 text-accentCyan" />
           <span>{toastMessage}</span>
         </div>
       )}
