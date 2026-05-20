@@ -6,6 +6,7 @@ import HistorySidebar from './components/HistorySidebar';
 import Home from './pages/Home';
 import Analyze from './pages/Analyze';
 import History from './pages/History';
+import Generate from './pages/Generate';
 import Auth from './pages/Auth';
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/analyze" element={<Analyze />} />
+              <Route path="/generate" element={<Generate />} />
               <Route path="/history" element={<History />} />
               <Route path="/auth" element={<Auth />} />
             </Routes>

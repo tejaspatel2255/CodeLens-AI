@@ -1,15 +1,28 @@
 import React, { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Terminal, History, Menu, X, Sparkles, User, LogOut, LogIn } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function Navbar() {
   const { sidebarOpen, setSidebarOpen, user, logout } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    setMobileMenuOpen(false);
+    navigate('/');
+  };
+
+  if (location.pathname === '/auth') {
+    return null;
+  }
 
   const navigation = [
     { name: 'Home', href: '/' },
     { name: 'Analyze Code', href: '/analyze' },
+    { name: 'Generate Code', href: '/generate' },
     { name: 'History', href: '/history' },
   ];
 
@@ -91,7 +104,7 @@ export default function Navbar() {
                 
                 {/* Sign Out Button */}
                 <button
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="p-1.5 rounded-xl border border-border bg-surface hover:bg-accentRed/10 hover:border-accentRed/35 hover:text-accentRed transition-all duration-300 cursor-pointer"
                   title="Sign Out Cloud Session"
                 >
@@ -164,10 +177,7 @@ export default function Navbar() {
                 </div>
               </div>
               <button
-                onClick={() => {
-                  logout();
-                  setMobileMenuOpen(false);
-                }}
+                onClick={handleLogout}
                 className="w-full py-2.5 rounded-xl border border-accentRed/30 bg-accentRed/5 text-accentRed font-heading text-xs font-black uppercase tracking-wider text-center cursor-pointer"
               >
                 Sign Out Account

@@ -25,6 +25,17 @@ export default function CodeEditor({ onAnalyze, loading, activeLine }) {
   useEffect(() => {
     if (currentAnalysis && currentAnalysis.original_code) {
       setCode(currentAnalysis.original_code);
+    } else {
+      // Check for draft generated code passing through from Generate page
+      const draftCode = localStorage.getItem('codelens_draft_code');
+      const draftLang = localStorage.getItem('codelens_draft_lang');
+      if (draftCode) {
+        setCode(draftCode);
+        if (draftLang) setManualLang(draftLang);
+        // Clear it so it doesn't persist across random unmounts
+        localStorage.removeItem('codelens_draft_code');
+        localStorage.removeItem('codelens_draft_lang');
+      }
     }
   }, [currentAnalysis]);
 
