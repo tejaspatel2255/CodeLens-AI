@@ -1,65 +1,82 @@
 # TraceVerse AI 🔎
 
-**TraceVerse AI** is a step-by-step code debugger, trace visualizer, and computer science explainer designed for both students and professionals. Powered by **Groq API** (Llama-3.3-70b-versatile) and backed by a **Supabase PostgreSQL database**, it takes standard code snippets, creates high-fidelity logical step breakdowns, presents localized memory CPU trace states ("Under the Hood"), shares fun everyday analogies, highlights syntactical defects, and narrates explanations out loud.
+**TraceVerse AI** is a full-stack AI-powered code intelligence platform for students and professionals. It provides step-by-step code analysis, an interactive memory sandbox, AI code generation, and voice narration — all backed by **Groq API** (Llama-3.3-70b-versatile) and **Supabase PostgreSQL**.
+
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green?style=flat-square&logo=node.js)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-18-blue?style=flat-square&logo=react)](https://react.dev/)
+[![Groq](https://img.shields.io/badge/Groq-LLM-orange?style=flat-square)](https://console.groq.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-teal?style=flat-square&logo=supabase)](https://supabase.com/)
+
+---
+
+## ✨ Features
+
+### 🧠 Analyze Code
+Paste any code snippet and get a full AI-powered breakdown:
+- Step-by-step execution traces with memory, CPU, and call-stack states
+- Real-world analogies for every line
+- Bug detection with fix suggestions
+- Complexity analysis and optimization tips
+
+### ⚡ Generate Code
+Describe a programming problem with specific constraints and the AI generates:
+- Fully correct, runnable code matching every constraint
+- Time & Space complexity analysis
+- A natural language explanation
+- A "Send to Analyzer" button to trace the generated code line-by-line
+
+### 🗄️ Personal History Archives
+- All analyses are stored per-user in Supabase
+- Authenticated users see **only their own data** — zero data bleed
+- Guest users see 5 static example templates to explore the platform
+
+### 🔐 Secure Authentication
+- Custom OTP email verification via Nodemailer (Gmail App Passwords)
+- Password hashing with `bcryptjs`
+- JWT-signed session tokens with per-resource authorization checks
+- Auto fallback to Ethereal test email if no SMTP is configured
+
+### 🎙️ Voice Tutor
+- AI narrates the execution flow and explains concepts aloud
+- Smart crossfade between narrators — no double-talk bugs
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** React (Vite), Tailwind CSS, Framer Motion, highlight.js, canvas-confetti, lucide-react
-- **Backend:** Node.js, Express, CORS, JSON Web Tokens (JWT), bcryptjs, nodemailer
-- **Database:** Supabase (PostgreSQL)
-- **AI Core:** Groq API (Llama-3.3-70b-versatile)
-
----
-
-## 🚀 Key Production Upgrades (Built-In)
-
-We have upgraded TraceVerse AI with a suite of enterprise-grade features:
-
-### 1. 🔒 Custom SMTP Authentication (Nodemailer)
-*   Switched from standard Supabase Auth to a fully custom backend login system.
-*   Secure local password hashing using `bcryptjs` and session signatures with custom JWT tokens.
-*   OTP email verification triggered via **Nodemailer** using secure Gmail App Passwords.
-*   *Zero-crash fallback:* If no SMTP is configured, it auto-spins an **Ethereal test mail system** and prints a one-click preview link in the terminal!
-
-### 2. ⚡ Synchronized Active Line Highlighting
-*   When stepping through your Call Stack frames inside the **Memory Sandbox** (right panel), the corresponding statement currently executing is visually highlighted in the left **Code Editor** in real-time.
-*   Features a glowing emerald background, neon left-border card overlays, and dynamic scale animations!
-
-### 3. 🎙️ Dual AI Speech Narrators
-Located at the header of your Execution Flow cards:
-*   **Narrate Flow (`🔊`):** Reads a concise, high-level control-flow brief of how the compiler interacts with the algorithmic structure.
-*   **Detailed AI Tutor (`🎓`):** Speaks a full computer science tutoring lecture! Explains programming languages, parses parameters, steps line-by-line through active execution values, and reads performance optimization tips.
-*   *Smart Crossfade:* Audio loops automatically terminate and bridge when toggling narrators, ensuring zero double-talk bugs.
-
-### 4. 🗃️ Session Logs CRUD Operations
-*   **Delete History Logs (Delete):** A beautiful glowing red trash can button on every log card in the history sidebar lets you securely wipe traces from the Supabase database.
-*   **Instant Code Re-use (Read & Reload):** Clicking a log card instantly extracts its code snippet and refills the editing workspace! You can edit, tweak, or analyze it again in a single click.
-
-### 5. 🔑 Enterprise Cryptographic History Locks
-*   Traces and logs are locked per user. 
-*   Registered session IDs require matching JWT header signatures, preventing malicious users from accessing, guessing, or viewing anyone else's history!
+| Layer | Technologies |
+|---|---|
+| **Frontend** | React 18, Vite, Tailwind CSS, Framer Motion, Lucide React |
+| **Backend** | Node.js, Express, Nodemailer, bcryptjs, JSON Web Tokens |
+| **Database** | Supabase (PostgreSQL) |
+| **AI Core** | Groq API — Llama-3.3-70b-versatile |
 
 ---
 
 ## 🚀 Getting Started
 
-Follow these steps to set up and run the application locally on your system.
+### Prerequisites
+- [Node.js](https://nodejs.org/) v18 or higher
+- A free [Groq API key](https://console.groq.com/keys)
+- A free [Supabase](https://supabase.com/) project
 
-### 1. Prerequisites
+---
 
-Make sure you have [Node.js](https://nodejs.org/) (v18 or higher recommended) installed.
+### 1. Clone the repository
 
-### 2. Set Up the Supabase Database
+```bash
+git clone https://github.com/your-username/traceverse-ai.git
+cd traceverse-ai
+```
 
-1. Create a free account on [Supabase](https://supabase.com/).
-2. Create a new project.
-3. Open the **SQL Editor** in your Supabase project dashboard.
-4. Execute the SQL queries inside [schema.sql](file:///d:/CodeLens%20AI/server/db/schema.sql) to create the custom auth tables, and create the master `code_analyses` table:
+### 2. Set up the Supabase Database
+
+1. Create a project on [supabase.com](https://supabase.com/)
+2. Go to **SQL Editor** and run the schema from `server/db/schema.sql`
+
+The main table looks like this:
 
 ```sql
--- Create code analyses table
 create table code_analyses (
   id uuid default gen_random_uuid() primary key,
   user_session text not null,
@@ -77,64 +94,110 @@ create table code_analyses (
 
 ### 3. Configure Environment Variables
 
-Create a file named `.env` in the root of this project (use our [.env.example](file:///d:/CodeLens%20AI/.env.example) template as a guide!). Fill in your respective keys:
+Copy the example file and fill in your credentials:
 
-```env
-GROQ_API_KEY=gsk_your_actual_groq_api_key_here
-SUPABASE_URL=https://your-project-id.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key-here
-PORT=5000
-JWT_SECRET=some_strong_jwt_signature_secret_key
-SMTP_USER=your_gmail_address@gmail.com
-SMTP_PASS=your_gmail_app_password
+```bash
+cp .env.example .env
 ```
 
----
+**Required keys in `.env`:**
 
-## 💻 Running the App Locally
+```env
+# Groq AI — get your key at https://console.groq.com/keys
+GROQ_API_KEY=gsk_your_groq_api_key_here
 
-We have integrated a monorepo-style setup at the root. You don't need to boot separate terminal sessions unless you want to!
+# Supabase — from Project Settings > API
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
-### 1. Install all dependencies (Client + Server + Root)
-From the root directory, run:
+# Backend server
+PORT=5000
+JWT_SECRET=your_strong_secret_here
+
+# Email verification (Gmail App Password)
+SMTP_USER=your@gmail.com
+SMTP_PASS=xxxx_xxxx_xxxx_xxxx
+
+# Client (Vite)
+VITE_API_URL=http://localhost:5000
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your_anon_key
+
+# Token optimization (maximize free Groq tier throughput)
+GROQ_MAX_TOKENS=2048
+GROQ_GENERATE_REVIEW=false
+```
+
+> **Tip:** If you leave `SMTP_USER` and `SMTP_PASS` empty, the server automatically generates an [Ethereal](https://ethereal.email/) test inbox and prints a preview link in the terminal — no setup needed for local testing!
+
+### 4. Install dependencies
+
 ```bash
 npm run install-all
 ```
 
-### 2. Run both the Frontend and Backend concurrently
-From the root directory, run:
+### 5. Start the app
+
 ```bash
 npm run dev
 ```
 
-This single command triggers:
-- The **Vite React Frontend** booting on [http://localhost:5173](http://localhost:5173)
-- The **Express Backend Server** starting on [http://localhost:5000](http://localhost:5000)
+This starts both servers concurrently:
+- **Frontend** → [http://localhost:5173](http://localhost:5173)
+- **Backend** → [http://localhost:5000](http://localhost:5000)
 
 ---
 
-## 📂 Project Architecture
+## 📂 Project Structure
 
 ```
 traceverse-ai/
-├── client/                      # Vite React Frontend
-│   ├── src/
-│   │   ├── components/          # Navbar, CodeEditor, StepCard, BugCard, etc.
-│   │   ├── pages/               # Home, Analyze, History, Auth
-│   │   ├── hooks/               # Custom API caller hooks (useAnalyze.js)
-│   │   ├── context/             # Global Session & Cache Manager (AppContext.jsx)
-│   │   ├── lib/                 # Supabase configuration helper
-│   │   ├── App.jsx              # Routing & Master Layout
-│   │   └── main.jsx             # React Bootstrap Root
-│   └── tailwind.config.js       # Custom animations, fonts, and colors
-├── server/                      # Express Backend Server
-│   ├── routes/                  # Express routers (/analyze, /history, /auth)
-│   ├── controllers/             # Core controllers (Groq query, auth checking)
-│   ├── prompts/                 # Strict LLM output system Prompts
-│   ├── db/                      # PostgreSQL Custom Schemas (schema.sql)
-│   ├── lib/                     # Database connector configuration
-│   └── index.js                 # Server entry bootstraper
-├── .env                         # Shared key configurations
-├── .gitignore                   # Safe Git files exclusions rules
-└── README.md                    # Project documentation (this file)
+├── client/                        # Vite + React Frontend
+│   └── src/
+│       ├── components/            # Navbar, CodeEditor, StepCard, BugCard, etc.
+│       ├── pages/                 # Home, Analyze, Generate, History, Auth
+│       ├── hooks/                 # useAnalyze.js, useGenerate.js
+│       ├── context/               # AppContext — global session & history cache
+│       └── App.jsx                # Routes & master layout
+│
+├── server/                        # Node.js + Express Backend
+│   ├── controllers/               # analyzeController, generateController, authController
+│   ├── routes/                    # /api/analyze, /api/generate, /api/history, /api/auth
+│   ├── prompts/                   # LLM system prompts (systemPrompt, generatePrompt, codeReviewPrompt)
+│   ├── lib/                       # Supabase client, Groq JSON helper, error formatter
+│   ├── db/                        # schema.sql — full Supabase table definitions
+│   └── index.js                   # Express server entry point
+│
+├── .env.example                   # Environment variable template (safe to commit)
+├── .gitignore                     # Git exclusions
+└── README.md                      # This file
 ```
+
+---
+
+## ⚙️ Token Optimization
+
+The free Groq tier allows ~**6,000 tokens per minute**, giving you roughly:
+
+| Mode | `GROQ_MAX_TOKENS` | `GROQ_GENERATE_REVIEW` | Requests/day |
+|---|---|---|---|
+| **High throughput** | `2048` | `false` | ~4,200 ✅ |
+| **Balanced** | `4096` | `false` | ~2,100 |
+| **Quality (two-pass)** | `8192` | `true` | ~430 |
+
+Switch modes instantly by editing `server/.env` — no code changes required.
+
+---
+
+## 🔒 Security Notes
+
+- **Never commit `.env` files** — they are excluded by `.gitignore`
+- All user history is locked behind JWT verification — no cross-user data access
+- Guest users see only static example templates, never other users' data
+- Passwords are hashed with `bcryptjs` and never stored in plain text
+
+---
+
+## 📄 License
+
+MIT License — feel free to fork, extend, and build on top of TraceVerse AI.

@@ -19,13 +19,14 @@ import cors from 'cors';
 import analyzeRouter from './routes/analyze.js';
 import historyRouter from './routes/history.js';
 import authRouter from './routes/authRoutes.js';
+import generateRouter from './routes/generate.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Enable CORS for frontend development server
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+  origin: ['http://localhost:5173', 'http://127.0.0.1:5173', 'https://traceverse-ai.vercel.app'],
   credentials: true
 }));
 
@@ -36,6 +37,7 @@ app.use(express.json());
 app.use('/api/analyze', analyzeRouter);
 app.use('/api/history', historyRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/generate', generateRouter);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

@@ -21,7 +21,10 @@ export function formatGroqApiError(status, rawBody) {
   }
 
   if (status === 429) {
-    return 'Groq rate limit reached. Wait a moment and try again.';
+    const retryHint = message?.includes('retry')
+      ? message
+      : 'Groq free-tier limits apply per minute. Wait 30–60 seconds, avoid rapid clicks, then try again.';
+    return retryHint;
   }
 
   return message

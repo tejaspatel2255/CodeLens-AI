@@ -282,13 +282,16 @@ export const getHistory = async (req, res) => {
       throw error;
     }
 
-    // Dynamic Onboarding Deduplication: 
-    // Filter out default mock templates if the user already has their own custom scanned history for that language!
-    const scannedLanguages = new Set((data || []).map(item => item.language.toUpperCase()));
-    const filteredMocks = MOCK_TEMPLATES.filter(mock => !scannedLanguages.has(mock.language.toUpperCase()));
+    let result = data || [];
 
-    const merged = [...(data || []), ...filteredMocks];
-    return res.status(200).json(merged);
+    // If the session does not belong to a registered user (guest), append the static mock templates
+    if (!userRecord) {
+      const scannedLanguages = new Set(result.map(item => item.language.toUpperCase()));
+      const filteredMocks = MOCK_TEMPLATES.filter(mock => !scannedLanguages.has(mock.language.toUpperCase()));
+      result = [...result, ...filteredMocks];
+    }
+
+    return res.status(200).json(result);
   } catch (error) {
     console.error('History Controller Error:', error);
     return res.status(500).json({ error: error.message || 'An error occurred while fetching analysis history.' });
