@@ -24,9 +24,15 @@ import generateRouter from './routes/generate.js';
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Enable CORS for frontend development server
+// Enable CORS for frontend development server and dynamic Vercel deployments
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://127.0.0.1:5173', 'https://traceverse-ai.vercel.app'],
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1') || origin.endsWith('vercel.app')) {
+      return callback(null, true);
+    }
+    return callback(new Error('CORS not allowed for: ' + origin), false);
+  },
   credentials: true
 }));
 
