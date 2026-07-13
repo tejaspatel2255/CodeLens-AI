@@ -1,7 +1,7 @@
 {
-  "name": "traceverse-ai-server",
+  "name": "codelens-ai-server",
   "version": "1.0.0",
-  "description": "Express backend for TraceVerse AI code explanation engine",
+  "description": "Express backend for CodeLens AI code explanation engine",
   "main": "index.js",
   "type": "module",
   "scripts": {

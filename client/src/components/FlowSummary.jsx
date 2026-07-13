@@ -69,7 +69,7 @@ export default function FlowSummary({ flow, concepts = [], optimizations = [], s
     if (!steps || steps.length === 0) return;
 
     // Structure a highly detailed tutoring narration
-    let monologue = `Welcome to the TraceVerse AI detailed walkthrough. Let's analyze this program together. `;
+    let monologue = `Welcome to the CodeLens AI detailed walkthrough. Let's analyze this program together. `;
     
     if (flow) {
       monologue += `At a high level, the execution flow is as follows: ${flow.replace(/[{}[\]"']/g, '')}. `;

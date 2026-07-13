@@ -1,7 +1,7 @@
 {
-  "name": "traceverse-ai-monorepo",
+  "name": "codelens-ai-monorepo",
   "version": "1.0.0",
-  "description": "TraceVerse AI - Step-by-Step Code Debugger and Explainer",
+  "description": "CodeLens AI - Step-by-Step Code Debugger and Explainer",
   "scripts": {
     "install:server": "cd server && npm install --legacy-peer-deps",
     "install:client": "cd client && npm install --legacy-peer-deps",

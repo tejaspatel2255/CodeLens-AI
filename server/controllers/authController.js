@@ -116,12 +116,12 @@ export const signup = async (req, res) => {
     // Dispatch OTP via Nodemailer SMTP
     const transporter = await getTransporter();
     const mailOptions = {
-      from: process.env.SMTP_FROM || '"TraceVerse AI" <gatekeeper@traceverse.ai>',
+      from: process.env.SMTP_FROM || '"CodeLens AI" <gatekeeper@codelens.ai>',
       to: email.trim().toLowerCase(),
-      subject: '🔑 Your TraceVerse AI Verification OTP',
+      subject: '🔑 Your CodeLens AI Verification OTP',
       html: `
         <div style="font-family: Arial, sans-serif; background-color: #080c14; color: #f8fafc; padding: 40px; border-radius: 12px; max-width: 600px; margin: 0 auto; border: 1px solid #1e293b;">
-          <h2 style="color: #00f5c4; text-align: center; text-transform: uppercase; letter-spacing: 2px;">TraceVerse AI</h2>
+          <h2 style="color: #00f5c4; text-align: center; text-transform: uppercase; letter-spacing: 2px;">CodeLens AI</h2>
           <hr style="border-color: #1e293b; margin: 20px 0;" />
           <p style="font-size: 15px; line-height: 1.6; color: #94a3b8;">Welcome to the future of step-by-step trace debugging!</p>
           <p style="font-size: 15px; line-height: 1.6; color: #94a3b8;">Please verify your registration by entering the secure 6-digit confirmation code below:</p>

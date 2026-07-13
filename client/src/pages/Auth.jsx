@@ -22,7 +22,7 @@ export default function Auth() {
   
   // Stages: 'login' | 'register' | 'otp'
   const [mode, setMode] = useState('login'); 
-  const [email, setEmail] = useState(() => localStorage.getItem('traceverse_last_email') || '');
+  const [email, setEmail] = useState(() => localStorage.getItem('codelens_last_email') || '');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -127,7 +127,7 @@ export default function Auth() {
       }
 
       setSuccess("Logged in successfully! Redirecting...");
-      localStorage.setItem('traceverse_last_email', email.trim().toLowerCase());
+      localStorage.setItem('codelens_last_email', email.trim().toLowerCase());
       authenticateUser(resData.token, resData.user);
       setTimeout(() => navigate('/analyze'), 1000);
     } catch (err) {
@@ -181,8 +181,8 @@ export default function Auth() {
       const resData = await response.json();
       if (!response.ok) throw new Error(resData.error || "Failed to verify registration code.");
 
-      setSuccess("Email successfully verified! Welcome to TraceVerse AI.");
-      localStorage.setItem('traceverse_last_email', email.trim().toLowerCase());
+      setSuccess("Email successfully verified! Welcome to CodeLens AI.");
+      localStorage.setItem('codelens_last_email', email.trim().toLowerCase());
       authenticateUser(resData.token, resData.user);
       setTimeout(() => navigate('/analyze'), 1200);
     } catch (err) {
@@ -204,13 +204,13 @@ export default function Auth() {
       {/* Main Glassmorphic Wrapper */}
       <div className="relative z-10 w-full max-w-md px-4 sm:px-0">
         
-        {/* TraceVerse Brand Title */}
+        {/* CodeLens Brand Title */}
         <div className="text-center mb-8">
           <span className="font-heading text-[10px] font-black uppercase tracking-widest text-accentCyan bg-accentCyan/10 px-3 py-1 rounded-full border border-accentCyan/20 inline-flex items-center gap-1.5 justify-center mb-3">
             <Sparkles className="h-3.5 w-3.5 text-accentCyan animate-pulse" /> Secure Gatekeeper
           </span>
           <h2 className="font-heading text-2xl sm:text-3xl font-black uppercase tracking-wide text-textMain">
-            TraceVerse Cloud Account
+            CodeLens Cloud Account
           </h2>
           <p className="text-xs text-mutedMain mt-1">
             Access secure trace sandboxes and sync execution histories.
@@ -269,7 +269,7 @@ export default function Auth() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="e.g. developer@traceverse.ai"
+                      placeholder="e.g. developer@codelens.ai"
                       className="w-full pl-10 pr-4 py-3 rounded-xl border border-border/80 bg-background font-body text-xs text-textMain placeholder:text-mutedMain/50 focus:border-accentCyan/50 focus:shadow-[0_0_12px_rgba(0,245,196,0.08)] outline-none transition-all"
                       autoComplete="off"
                       required
@@ -310,7 +310,7 @@ export default function Auth() {
 
                 <div className="pt-2 text-center border-t border-border/30 mt-4">
                   <p className="text-xs text-mutedMain">
-                    Don't have a TraceVerse account?{" "}
+                    Don't have a CodeLens account?{" "}
                     <button
                       type="button"
                       onClick={() => {
@@ -347,7 +347,7 @@ export default function Auth() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="e.g. developer@traceverse.ai"
+                      placeholder="e.g. developer@codelens.ai"
                       className="w-full pl-10 pr-4 py-3 rounded-xl border border-border/80 bg-background font-body text-xs text-textMain placeholder:text-mutedMain/50 focus:border-accentCyan/50 focus:shadow-[0_0_12px_rgba(0,245,196,0.08)] outline-none transition-all"
                       autoComplete="off"
                       required

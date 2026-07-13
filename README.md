@@ -1,6 +1,6 @@
-# TraceVerse AI 🔎
+# CodeLens AI 🔎
 
-**TraceVerse AI** is a full-stack AI-powered code intelligence platform for students and professionals. It provides step-by-step code analysis, an interactive memory sandbox, AI code generation, and voice narration — all backed by **Groq API** (Llama-3.3-70b-versatile) and **Supabase PostgreSQL**.
+**CodeLens AI** is a full-stack AI-powered code intelligence platform for students and professionals. It provides step-by-step code analysis, an interactive memory sandbox, AI code generation, and voice narration — all backed by **Groq API** (Llama-3.3-70b-versatile) and **Supabase PostgreSQL**.
 
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green?style=flat-square&logo=node.js)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-18-blue?style=flat-square&logo=react)](https://react.dev/)
@@ -65,8 +65,8 @@ Describe a programming problem with specific constraints and the AI generates:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/traceverse-ai.git
-cd traceverse-ai
+git clone https://github.com/your-username/codelens-ai.git
+cd codelens-ai
 ```
 
 ### 2. Set up the Supabase Database
@@ -151,7 +151,7 @@ This starts both servers concurrently:
 ## 📂 Project Structure
 
 ```
-traceverse-ai/
+codelens-ai/
 ├── client/                        # Vite + React Frontend
 │   └── src/
 │       ├── components/            # Navbar, CodeEditor, StepCard, BugCard, etc.
@@ -200,4 +200,4 @@ Switch modes instantly by editing `server/.env` — no code changes required.
 
 ## 📄 License
 
-MIT License — feel free to fork, extend, and build on top of TraceVerse AI.
+MIT License — feel free to fork, extend, and build on top of CodeLens AI.

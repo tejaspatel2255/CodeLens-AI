@@ -52,7 +52,7 @@ export default function LoadingAnimation() {
 
         {/* AI Branding */}
         <span className="font-heading text-xs font-bold uppercase tracking-widest text-accentCyan mb-2 flex items-center gap-1.5 justify-center">
-          <Sparkles className="h-3 w-3 animate-pulse" /> TraceVerse AI Explainer
+          <Sparkles className="h-3 w-3 animate-pulse" /> CodeLens AI Explainer
         </span>
 
         {/* Message crossfader */}

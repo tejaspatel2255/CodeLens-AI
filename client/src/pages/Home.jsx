@@ -328,7 +328,7 @@ export default function Home() {
 
       {/* Footer copyright */}
       <footer className="relative z-10 w-full border-t border-border/30 py-6 text-center text-[10px] text-mutedMain/50 uppercase tracking-widest font-semibold bg-background">
-        © 2026 TraceVerse AI. Built for students and developers.
+        © 2026 CodeLens AI. Built for students and developers.
       </footer>
     </div>
   );

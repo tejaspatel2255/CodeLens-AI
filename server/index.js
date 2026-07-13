@@ -47,10 +47,10 @@ app.use('/api/generate', generateRouter);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK', service: 'TraceVerse AI Server' });
+  res.status(200).json({ status: 'OK', service: 'CodeLens AI Server' });
 });
 
 // Start listening
 app.listen(PORT, () => {
-  console.log(`🚀 TraceVerse AI Server is active and listening on port ${PORT}`);
+  console.log(`🚀 CodeLens AI Server is active and listening on port ${PORT}`);
 });

@@ -192,7 +192,7 @@ export default function HistorySidebar() {
 
             {/* Sidebar Footer */}
             <div className="p-4 border-t border-border/80 bg-surface/50 text-[10px] text-mutedMain text-center uppercase tracking-wider font-semibold">
-              TraceVerse AI • Session Database
+              CodeLens AI • Session Database
             </div>
           </motion.div>
         </>
