@@ -14,26 +14,28 @@ export const getTransporter = async () => {
 
   if (host && rawPort && user && pass) {
     const port = parseInt(rawPort, 10);
-    // Explicitly cast port to number for comparison. Gmail: Port 465 requires secure: true (SSL), Port 587 requires secure: false (STARTTLS)
-    const isSecure = port === 465;
+    const isGmail = host.includes('gmail');
+
+    if (isGmail) {
+      return nodemailer.createTransport({
+        service: 'gmail',
+        auth: { user, pass }
+      });
+    }
 
     return nodemailer.createTransport({
       host,
       port,
-      secure: isSecure,
+      secure: port === 465,
       auth: { user, pass },
       family: 4,
       connectionTimeout: 10000,
       greetingTimeout: 10000,
       socketTimeout: 15000,
-      // Force DNS resolution to IPv4 addresses only
-      dnsOptions: {
-        family: 4
-      }
+      dnsOptions: { family: 4 }
     });
-
-
   }
+
 
   // In production, throw immediately if SMTP is missing
   if (process.env.NODE_ENV === 'production') {
