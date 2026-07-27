@@ -18,11 +18,13 @@ const getTransporter = async () => {
       port: parseInt(port),
       secure: port === '465', // true for SSL port 465, false for TLS 587
       auth: { user, pass },
+      family: 4, // Force IPv4 to prevent ENETUNREACH on cloud environments (Render/Vercel)
       connectionTimeout: 10000, // 10 seconds timeout
       greetingTimeout: 10000,
       socketTimeout: 15000
     });
   }
+
 
 
   // In production, throw immediately if SMTP is missing
