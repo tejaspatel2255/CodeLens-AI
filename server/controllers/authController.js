@@ -120,24 +120,10 @@ export const signup = async (req, res) => {
     if (otpErr) return handleDbError(otpErr, res);
 
     // Dispatch OTP via Nodemailer SMTP
-    let transporter = await getTransporter();
-
-    // Verify SMTP connection/auth BEFORE attempting to send mail
-    try {
-      await transporter.verify();
-    } catch (verifyErr) {
-      console.warn("⚠️ Custom SMTP connection failed, falling back to Ethereal test inbox:", verifyErr.message);
-      const testAccount = await nodemailer.createTestAccount();
-      transporter = nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        secure: false,
-        auth: { user: testAccount.user, pass: testAccount.pass }
-      });
-    }
-
+    const transporter = await getTransporter();
 
     // Gmail's SMTP relay silently drops or flags mail when From header doesn't match the authenticated SMTP_USER account
+
     const defaultFrom = process.env.SMTP_USER 
       ? `"CodeLens AI" <${process.env.SMTP_USER}>` 
       : '"CodeLens AI" <gatekeeper@codelens.ai>';
@@ -163,32 +149,19 @@ export const signup = async (req, res) => {
       `
     };
 
-    let info;
-    try {
-      info = await transporter.sendMail(mailOptions);
-    } catch (sendErr) {
-      console.error("❌ SMTP Send Mail Error:", sendErr);
-      const detail = sendErr.response || sendErr.message || sendErr;
-      throw new Error(`SMTP send failed: ${detail}`);
-    }
-
-    console.log("📧 Verification OTP dispatched:", info.messageId);
-
-    // If using Ethereal, log the clickable preview inbox!
-    const previewUrl = nodemailer.getTestMessageUrl(info);
-    if (previewUrl) {
-      console.log("\n======================================================================");
-      console.log("📬  [TEST MODE] OTP Verification Email Dispatched!");
-      console.log(`🔗  Click here to view your inbox: ${previewUrl}`);
-      console.log("======================================================================\n");
-    }
+    // Dispatch OTP asynchronously so registration UI returns immediately (<100ms)
+    transporter.sendMail(mailOptions).then(info => {
+      console.log("📧 Verification OTP dispatched successfully:", info.messageId);
+    }).catch(sendErr => {
+      console.error("❌ Background Email Dispatch Error:", sendErr.message || sendErr);
+    });
 
     return res.status(200).json({ 
       message: "Verification OTP dispatched successfully!",
-      previewUrl: previewUrl || null 
+      previewUrl: null 
     });
-
   } catch (err) {
+
     console.error("Signup Error Details:", {
       message: err.message,
       code: err.code,
