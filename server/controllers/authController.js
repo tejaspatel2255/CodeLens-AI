@@ -127,10 +127,12 @@ export const signup = async (req, res) => {
 
     // Dispatch OTP via Nodemailer SMTP
     const transporter = await getTransporter();
+    const fromAddress = process.env.SMTP_FROM || process.env.SMTP_USER || '"CodeLens AI" <gatekeeper@codelens.ai>';
     const mailOptions = {
-      from: process.env.SMTP_FROM || '"CodeLens AI" <gatekeeper@codelens.ai>',
+      from: fromAddress,
       to: email.trim().toLowerCase(),
       subject: '🔑 Your CodeLens AI Verification OTP',
+
       html: `
         <div style="font-family: Arial, sans-serif; background-color: #080c14; color: #f8fafc; padding: 40px; border-radius: 12px; max-width: 600px; margin: 0 auto; border: 1px solid #1e293b;">
           <h2 style="color: #00f5c4; text-align: center; text-transform: uppercase; letter-spacing: 2px;">CodeLens AI</h2>
