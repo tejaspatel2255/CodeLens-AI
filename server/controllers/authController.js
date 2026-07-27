@@ -22,11 +22,17 @@ export const getTransporter = async () => {
       port,
       secure: isSecure,
       auth: { user, pass },
-      family: 4, // Force IPv4 to prevent ENETUNREACH on cloud environments (Render/Vercel)
-      connectionTimeout: 10000, // 10 seconds timeout
+      family: 4,
+      connectionTimeout: 10000,
       greetingTimeout: 10000,
-      socketTimeout: 15000
+      socketTimeout: 15000,
+      // Force DNS resolution to IPv4 addresses only
+      dnsOptions: {
+        family: 4
+      }
     });
+
+
   }
 
   // In production, throw immediately if SMTP is missing
