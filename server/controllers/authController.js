@@ -6,17 +6,21 @@ import { JWT_SECRET } from '../lib/env.js';
 
 
 // Helper: Setup Nodemailer Transporter dynamically
-const getTransporter = async () => {
+export const getTransporter = async () => {
   const host = process.env.SMTP_HOST;
-  const port = process.env.SMTP_PORT;
+  const rawPort = process.env.SMTP_PORT;
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
 
-  if (host && port && user && pass) {
+  if (host && rawPort && user && pass) {
+    const port = parseInt(rawPort, 10);
+    // Explicitly cast port to number for comparison. Gmail: Port 465 requires secure: true (SSL), Port 587 requires secure: false (STARTTLS)
+    const isSecure = port === 465;
+
     return nodemailer.createTransport({
       host,
-      port: parseInt(port),
-      secure: port === '465', // true for SSL port 465, false for TLS 587
+      port,
+      secure: isSecure,
       auth: { user, pass },
       family: 4, // Force IPv4 to prevent ENETUNREACH on cloud environments (Render/Vercel)
       connectionTimeout: 10000, // 10 seconds timeout
@@ -24,8 +28,6 @@ const getTransporter = async () => {
       socketTimeout: 15000
     });
   }
-
-
 
   // In production, throw immediately if SMTP is missing
   if (process.env.NODE_ENV === 'production') {
@@ -49,7 +51,6 @@ const getTransporter = async () => {
     }
   });
 };
-
 
 // Helper: Standard DB table error handler
 const handleDbError = (err, res) => {
@@ -127,12 +128,26 @@ export const signup = async (req, res) => {
 
     // Dispatch OTP via Nodemailer SMTP
     const transporter = await getTransporter();
-    const fromAddress = process.env.SMTP_FROM || process.env.SMTP_USER || '"CodeLens AI" <gatekeeper@codelens.ai>';
+
+    // Verify SMTP connection/auth BEFORE attempting to send mail
+    try {
+      await transporter.verify();
+    } catch (verifyErr) {
+      console.error("❌ SMTP Connection/Auth Verification Error:", verifyErr);
+      const detail = verifyErr.response || verifyErr.message || verifyErr;
+      throw new Error(`SMTP connection/auth failed: ${detail}`);
+    }
+
+    // Gmail's SMTP relay silently drops or flags mail when From header doesn't match the authenticated SMTP_USER account
+    const defaultFrom = process.env.SMTP_USER 
+      ? `"CodeLens AI" <${process.env.SMTP_USER}>` 
+      : '"CodeLens AI" <gatekeeper@codelens.ai>';
+    const fromAddress = process.env.SMTP_FROM || defaultFrom;
+
     const mailOptions = {
       from: fromAddress,
       to: email.trim().toLowerCase(),
       subject: '🔑 Your CodeLens AI Verification OTP',
-
       html: `
         <div style="font-family: Arial, sans-serif; background-color: #080c14; color: #f8fafc; padding: 40px; border-radius: 12px; max-width: 600px; margin: 0 auto; border: 1px solid #1e293b;">
           <h2 style="color: #00f5c4; text-align: center; text-transform: uppercase; letter-spacing: 2px;">CodeLens AI</h2>
@@ -149,7 +164,15 @@ export const signup = async (req, res) => {
       `
     };
 
-    const info = await transporter.sendMail(mailOptions);
+    let info;
+    try {
+      info = await transporter.sendMail(mailOptions);
+    } catch (sendErr) {
+      console.error("❌ SMTP Send Mail Error:", sendErr);
+      const detail = sendErr.response || sendErr.message || sendErr;
+      throw new Error(`SMTP send failed: ${detail}`);
+    }
+
     console.log("📧 Verification OTP dispatched:", info.messageId);
 
     // If using Ethereal, log the clickable preview inbox!
@@ -167,12 +190,18 @@ export const signup = async (req, res) => {
     });
 
   } catch (err) {
-    console.error("Signup Crash Error:", err);
+    console.error("Signup Error Details:", {
+      message: err.message,
+      code: err.code,
+      response: err.response,
+      responseCode: err.responseCode
+    });
     return res.status(500).json({ error: err.message || "Unable to complete registration." });
   }
 };
 
 // 2. VERIFY 6-DIGIT OTP
+
 export const verifyOtp = async (req, res) => {
   const { email, token } = req.body;
 
