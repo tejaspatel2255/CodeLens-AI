@@ -23,17 +23,23 @@ import generateRouter from './routes/generate.js';
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Enable CORS for frontend development server and dynamic Vercel deployments
+// Parse CORS allowed origins from environment variable
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()).filter(Boolean)
+  : ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:5000'];
+
+// Enable CORS with exact origin matching against ALLOWED_ORIGINS allowlist
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
-    if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1') || origin.endsWith('vercel.app')) {
+    if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
     return callback(new Error('CORS not allowed for: ' + origin), false);
   },
   credentials: true
 }));
+
 
 // Setup JSON body parsing
 app.use(express.json());
