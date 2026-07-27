@@ -1,18 +1,17 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { validateEnv } from './lib/env.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Root .env is the single source of truth (override stale OS-level GROQ_API_KEY)
+// Root .env is the single source of truth
 dotenv.config({ path: path.resolve(__dirname, '../.env'), override: true });
 
-if (!process.env.GROQ_API_KEY?.trim()) {
-  console.warn(
-    '⚠️  GROQ_API_KEY is missing. Code analysis will fail until you add a key to the root .env file.'
-  );
-}
+// Validate environment variables on boot
+validateEnv();
+
 
 import express from 'express';
 import cors from 'cors';

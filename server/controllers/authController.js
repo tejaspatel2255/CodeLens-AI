@@ -2,8 +2,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import { supabase } from '../lib/supabase.js';
+import { JWT_SECRET } from '../lib/env.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'codelens-ai-super-secret-key-2026';
 
 // Helper: Setup Nodemailer Transporter dynamically
 const getTransporter = async () => {

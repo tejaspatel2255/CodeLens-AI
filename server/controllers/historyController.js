@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { supabase } from '../lib/supabase.js';
+import { JWT_SECRET } from '../lib/env.js';
 
 const MOCK_TEMPLATES = [
   {
@@ -259,7 +260,6 @@ export const getHistory = async (req, res) => {
       }
 
       const token = authHeader.split(' ')[1];
-      const JWT_SECRET = process.env.JWT_SECRET || 'codelens-ai-super-secret-key-2026';
       
       try {
         const decoded = jwt.verify(token, JWT_SECRET);
@@ -376,7 +376,6 @@ export const deleteAnalysis = async (req, res) => {
       }
 
       const token = authHeader.split(' ')[1];
-      const JWT_SECRET = process.env.JWT_SECRET || 'codelens-ai-super-secret-key-2026';
       
       try {
         const decoded = jwt.verify(token, JWT_SECRET);

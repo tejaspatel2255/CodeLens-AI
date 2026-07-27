@@ -100,19 +100,15 @@ Copy the example file and fill in your credentials:
 cp .env.example .env
 ```
 
-**Required keys in `.env`:**
-
-```env
-# Groq AI — get your key at https://console.groq.com/keys
-GROQ_API_KEY=gsk_your_groq_api_key_here
-
-# Supabase — from Project Settings > API
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+# Required keys in `.env` (Server startup will fail if any of the mandatory 4 are missing):
+GROQ_API_KEY=gsk_your_groq_api_key_here          # Mandatory
+SUPABASE_URL=https://your-project.supabase.co     # Mandatory
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key   # Mandatory
+JWT_SECRET=your_strong_secret_here                # Mandatory
 
 # Backend server
 PORT=5000
-JWT_SECRET=your_strong_secret_here
+
 
 # Email verification (Gmail App Password)
 SMTP_USER=your@gmail.com
