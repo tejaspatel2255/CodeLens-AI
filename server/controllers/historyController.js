@@ -326,7 +326,28 @@ export const getAnalysisById = async (req, res) => {
       return res.status(404).json({ error: 'Analysis not found' });
     }
 
-    return res.status(200).json(data);
+    // 1. If analysis is marked public, allow access immediately
+    if (data.is_public) {
+      return res.status(200).json(data);
+    }
+
+    // 2. Otherwise, check JWT authorization to verify if requester owns the analysis
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        if (decoded.id === data.user_session) {
+          return res.status(200).json(data);
+        }
+      } catch (err) {
+        // Token invalid or expired
+      }
+    }
+
+    // 3. Reject access if not public and user is not owner
+    return res.status(403).json({ error: 'Access Denied: This analysis is private.' });
+
   } catch (error) {
     console.error('Fetch Analysis by ID Error:', error);
     return res.status(500).json({ error: error.message || 'An error occurred while fetching the shared analysis.' });
@@ -335,6 +356,7 @@ export const getAnalysisById = async (req, res) => {
 
 export const deleteAnalysis = async (req, res) => {
   const { id } = req.params;
+  const reqSessionId = req.body?.sessionId || req.query?.sessionId;
 
   if (!id) {
     return res.status(400).json({ error: 'Analysis ID is required' });
@@ -385,9 +407,14 @@ export const deleteAnalysis = async (req, res) => {
       } catch (err) {
         return res.status(401).json({ error: 'Access Denied: Session token is invalid or expired.' });
       }
+    } else {
+      // 3. For guest sessions, enforce lightweight session ID validation
+      if (!reqSessionId || reqSessionId !== sessionId) {
+        return res.status(403).json({ error: 'Access Denied: Session ID does not match analysis owner.' });
+      }
     }
 
-    // 3. Delete the history log row
+    // 4. Delete the history log row
     const { error: deleteErr } = await supabase
       .from('code_analyses')
       .delete()
@@ -401,3 +428,4 @@ export const deleteAnalysis = async (req, res) => {
     return res.status(500).json({ error: error.message || 'An error occurred while deleting the analysis.' });
   }
 };
+

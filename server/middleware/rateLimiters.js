@@ -28,11 +28,14 @@ export const otpLimiter = rateLimit({
   max: 5,
   keyGenerator: (req) => {
     const email = req.body?.email?.toString().trim().toLowerCase();
-    return email || req.ip; // key by email if provided, fallback to IP
+    return email || req.ip;
   },
+  validate: { keyGeneratorIpFallback: false },
   message: {
     error: 'Too many OTP verification attempts for this account. Please wait 15 minutes before attempting again.'
   },
   standardHeaders: true,
   legacyHeaders: false,
 });
+
+

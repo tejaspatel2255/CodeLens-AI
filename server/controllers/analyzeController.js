@@ -3,7 +3,8 @@ import { formatGroqApiError } from '../lib/groqErrors.js';
 import systemPrompt from '../prompts/systemPrompt.js';
 
 export const analyzeCode = async (req, res) => {
-  const { code, sessionId, language } = req.body;
+  const { code, sessionId, language, makePublic } = req.body;
+
 
   if (!code || typeof code !== 'string' || !code.trim()) {
     return res.status(400).json({ error: 'Code content cannot be empty' });
@@ -95,9 +96,11 @@ export const analyzeCode = async (req, res) => {
           bugs: parsedResult.bugs || [],
           optimizations: parsedResult.optimizations || [],
           concepts: parsedResult.concepts || [],
-          flow: parsedResult.flow || ''
+          flow: parsedResult.flow || '',
+          is_public: Boolean(makePublic)
         }
       ])
+
       .select();
 
     if (dbError) {
