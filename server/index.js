@@ -15,6 +15,7 @@ validateEnv();
 
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import analyzeRouter from './routes/analyze.js';
 import historyRouter from './routes/history.js';
 import authRouter from './routes/authRoutes.js';
@@ -22,6 +23,9 @@ import generateRouter from './routes/generate.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Security HTTP headers
+app.use(helmet());
 
 // Parse CORS allowed origins from environment variable
 const allowedOrigins = process.env.ALLOWED_ORIGINS
@@ -40,9 +44,8 @@ app.use(cors({
   credentials: true
 }));
 
-
-// Setup JSON body parsing
-app.use(express.json());
+// Setup JSON body parsing with explicit 100kb payload limit
+app.use(express.json({ limit: '100kb' }));
 
 // Routes
 app.use('/api/analyze', analyzeRouter);
@@ -55,7 +58,24 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', service: 'CodeLens AI Server' });
 });
 
+// Catch-all 404 handler
+app.use((req, res, next) => {
+  res.status(404).json({ error: `Cannot ${req.method} ${req.originalUrl} - Endpoint not found.` });
+});
+
+// Global error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Unhandled Server Error:', err);
+  const statusCode = err.status || err.statusCode || 500;
+  res.status(statusCode).json({
+    error: process.env.NODE_ENV === 'production' 
+      ? 'An unexpected internal server error occurred.' 
+      : err.message || 'Internal Server Error'
+  });
+});
+
 // Start listening
 app.listen(PORT, () => {
   console.log(`🚀 CodeLens AI Server is active and listening on port ${PORT}`);
 });
+

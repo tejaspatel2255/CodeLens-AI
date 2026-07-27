@@ -10,9 +10,14 @@ export const analyzeCode = async (req, res) => {
     return res.status(400).json({ error: 'Code content cannot be empty' });
   }
 
+  if (code.length > 20000) {
+    return res.status(400).json({ error: 'Code payload is too large. Maximum allowed size is 20,000 characters per analysis.' });
+  }
+
   if (!sessionId) {
     return res.status(400).json({ error: 'Session ID is required' });
   }
+
 
   const groqApiKey = process.env.GROQ_API_KEY?.trim();
   if (!groqApiKey) {

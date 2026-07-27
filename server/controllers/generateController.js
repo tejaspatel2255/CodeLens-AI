@@ -51,6 +51,11 @@ export const generateCode = async (req, res) => {
     return res.status(400).json({ error: 'Question content cannot be empty' });
   }
 
+  if (question.length > 20000) {
+    return res.status(400).json({ error: 'Question payload is too large. Maximum allowed size is 20,000 characters per prompt.' });
+  }
+
+
   const groqApiKey = process.env.GROQ_API_KEY?.trim();
   if (!groqApiKey) {
     return res.status(500).json({

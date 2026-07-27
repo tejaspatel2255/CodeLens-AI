@@ -21,7 +21,12 @@ const getTransporter = async () => {
     });
   }
 
-  // Fallback: Dynamic Ethereal Test SMTP (Works 100% instantly without configuration!)
+  // In production, throw immediately if SMTP is missing
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('SMTP environment variables (SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS) are not configured for production email dispatch.');
+  }
+
+  // Fallback for non-production / local testing: Dynamic Ethereal Test SMTP
   console.log("\n======================================================================");
   console.log("ℹ️  SMTP keys not found in .env. Generating temporary Ethereal account...");
   const testAccount = await nodemailer.createTestAccount();
@@ -38,6 +43,7 @@ const getTransporter = async () => {
     }
   });
 };
+
 
 // Helper: Standard DB table error handler
 const handleDbError = (err, res) => {
