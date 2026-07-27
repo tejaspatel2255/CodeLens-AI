@@ -19,11 +19,12 @@ export const getTransporter = async () => {
       port,
       secure: port === 465,
       auth: { user, pass },
-      connectionTimeout: 5000,
-      greetingTimeout: 5000,
-      socketTimeout: 8000
+      connectionTimeout: 3000,
+      greetingTimeout: 3000,
+      socketTimeout: 3000
     });
   }
+
 
   // Fallback for non-production / local testing: Dynamic Ethereal Test SMTP
   console.log("\n======================================================================");
