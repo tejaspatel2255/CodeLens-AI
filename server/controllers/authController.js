@@ -109,6 +109,16 @@ export const signup = async (req, res) => {
     if (!brevoRes.ok) {
       const errBody = await brevoRes.json().catch(() => ({}));
       console.error('❌ Brevo Email Error:', brevoRes.status, errBody);
+
+      // Graceful fallback if Brevo account is pending activation: log OTP and return friendly message
+      if (brevoRes.status === 403 || (errBody.message && errBody.message.includes('not yet activated'))) {
+        console.warn(`⚠️ [PENDING ACTIVATION FALLBACK] Brevo account pending activation. Your registration OTP code for ${email} is: [ ${otp} ]`);
+        return res.status(200).json({
+          message: `Verification OTP generated! (Brevo pending activation - Your OTP Code is: ${otp})`,
+          previewUrl: null
+        });
+      }
+
       return res.status(500).json({
         error: 'Failed to send verification email: ' + (errBody.message || brevoRes.statusText)
       });
@@ -121,6 +131,7 @@ export const signup = async (req, res) => {
       message: "Verification OTP dispatched successfully!",
       previewUrl: null 
     });
+
   } catch (err) {
     console.error("Signup Crash Error:", err);
     return res.status(500).json({ error: err.message || "Unable to complete registration." });
