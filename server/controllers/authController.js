@@ -4,8 +4,9 @@ import { Resend } from 'resend';
 import { supabase } from '../lib/supabase.js';
 import { JWT_SECRET } from '../lib/env.js';
 
-// Lazily initialize Resend instance
-const getResendClient = () => new Resend(process.env.RESEND_API_KEY);
+// Lazily initialize Resend instance with trimmed API key
+const getResendClient = () => new Resend((process.env.RESEND_API_KEY || '').trim());
+
 
 
 // Helper: Standard DB table error handler
