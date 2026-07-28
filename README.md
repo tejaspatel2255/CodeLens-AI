@@ -31,10 +31,11 @@ Describe a programming problem with specific constraints and the AI generates:
 - Guest users see 5 static example templates to explore the platform
 
 ### 🔐 Secure Authentication
-- Custom OTP email verification via Nodemailer (Gmail App Passwords)
+- OTP email verification via Brevo Transactional REST API (HTTP Port 443)
 - Password hashing with `bcryptjs`
 - JWT-signed session tokens with per-resource authorization checks
-- Auto fallback to Ethereal test email if no SMTP is configured
+- Graceful activation fallbacks for zero registration downtime
+
 
 ### 🎙️ Voice Tutor
 - AI narrates the execution flow and explains concepts aloud

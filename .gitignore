@@ -68,5 +68,7 @@ Thumbs.db
 # ─── Temporary / Test Files ───────────────────────────────────────────────────
 *.tmp
 *.temp
+*.zip
 coverage/
 .nyc_output/
+
