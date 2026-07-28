@@ -13,8 +13,10 @@ const requiredEnvVars = [
   'GROQ_API_KEY',
   'SUPABASE_URL',
   'SUPABASE_SERVICE_ROLE_KEY',
-  'RESEND_API_KEY',
+  'BREVO_API_KEY',
+  'BREVO_FROM_EMAIL',
 ];
+
 
 
 export const validateEnv = () => {

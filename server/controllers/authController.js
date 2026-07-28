@@ -1,13 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { Resend } from 'resend';
 import { supabase } from '../lib/supabase.js';
 import { JWT_SECRET } from '../lib/env.js';
-
-// Lazily initialize Resend instance with trimmed API key
-const getResendClient = () => new Resend((process.env.RESEND_API_KEY || '').trim());
-
-
 
 // Helper: Standard DB table error handler
 const handleDbError = (err, res) => {
@@ -83,35 +77,45 @@ export const signup = async (req, res) => {
 
     if (otpErr) return handleDbError(otpErr, res);
 
-    // Dispatch OTP via Resend HTTP API
-    const resend = getResendClient();
-    const { data, error } = await resend.emails.send({
+    // Dispatch OTP via Brevo HTTP REST API
+    const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'api-key': (process.env.BREVO_API_KEY || '').trim()
+      },
+      body: JSON.stringify({
+        sender: { name: 'CodeLens AI', email: process.env.BREVO_FROM_EMAIL },
+        to: [{ email: email.trim().toLowerCase() }],
+        subject: '🔑 Your CodeLens AI Verification OTP',
+        htmlContent: `
+          <div style="font-family: Arial, sans-serif; background-color: #080c14; color: #f8fafc; padding: 40px; border-radius: 12px; max-width: 600px; margin: 0 auto; border: 1px solid #1e293b;">
+            <h2 style="color: #00f5c4; text-align: center; text-transform: uppercase; letter-spacing: 2px;">CodeLens AI</h2>
+            <hr style="border-color: #1e293b; margin: 20px 0;" />
+            <p style="font-size: 15px; line-height: 1.6; color: #94a3b8;">Welcome to the future of step-by-step trace debugging!</p>
+            <p style="font-size: 15px; line-height: 1.6; color: #94a3b8;">Please verify your registration by entering the secure 6-digit confirmation code below:</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <span style="font-family: monospace; font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #00f5c4; background-color: #0c1524; border: 1px solid #00f5c4; padding: 15px 30px; border-radius: 8px; box-shadow: 0 0 15px rgba(0, 245, 196, 0.15);">${otp}</span>
+            </div>
 
-      from: process.env.RESEND_FROM || 'CodeLens AI <onboarding@resend.dev>',
-      to: email.trim().toLowerCase(),
-      subject: '🔑 Your CodeLens AI Verification OTP',
-      html: `
-        <div style="font-family: Arial, sans-serif; background-color: #080c14; color: #f8fafc; padding: 40px; border-radius: 12px; max-width: 600px; margin: 0 auto; border: 1px solid #1e293b;">
-          <h2 style="color: #00f5c4; text-align: center; text-transform: uppercase; letter-spacing: 2px;">CodeLens AI</h2>
-          <hr style="border-color: #1e293b; margin: 20px 0;" />
-          <p style="font-size: 15px; line-height: 1.6; color: #94a3b8;">Welcome to the future of step-by-step trace debugging!</p>
-          <p style="font-size: 15px; line-height: 1.6; color: #94a3b8;">Please verify your registration by entering the secure 6-digit confirmation code below:</p>
-          
-          <div style="text-align: center; margin: 30px 0;">
-            <span style="font-family: monospace; font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #00f5c4; background-color: #0c1524; border: 1px solid #00f5c4; padding: 15px 30px; border-radius: 8px; box-shadow: 0 0 15px rgba(0, 245, 196, 0.15);">${otp}</span>
+            <p style="font-size: 12px; color: #64748b; text-align: center; margin-top: 30px;">This verification code will expire in 15 minutes. If you did not trigger this request, please disregard this email.</p>
           </div>
-
-          <p style="font-size: 12px; color: #64748b; text-align: center; margin-top: 30px;">This verification code will expire in 15 minutes. If you did not trigger this request, please disregard this email.</p>
-        </div>
-      `
+        `
+      })
     });
 
-    if (error) {
-      console.error('❌ Resend Email Error:', error);
-      return res.status(500).json({ error: 'Failed to send verification email: ' + error.message });
+    if (!brevoRes.ok) {
+      const errBody = await brevoRes.json().catch(() => ({}));
+      console.error('❌ Brevo Email Error:', brevoRes.status, errBody);
+      return res.status(500).json({
+        error: 'Failed to send verification email: ' + (errBody.message || brevoRes.statusText)
+      });
     }
 
-    console.log('📧 Verification OTP dispatched successfully via Resend:', data.id);
+    const brevoData = await brevoRes.json();
+    console.log('📧 Verification OTP dispatched successfully via Brevo:', brevoData.messageId);
 
     return res.status(200).json({ 
       message: "Verification OTP dispatched successfully!",
@@ -122,6 +126,7 @@ export const signup = async (req, res) => {
     return res.status(500).json({ error: err.message || "Unable to complete registration." });
   }
 };
+
 
 
 

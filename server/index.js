@@ -78,16 +78,17 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Startup diagnostic for Resend API key configuration
-if (process.env.RESEND_API_KEY) {
-  const key = process.env.RESEND_API_KEY;
-  const looksValid = key.startsWith('re_') && key.length > 20 && key === key.trim();
+// Startup diagnostic for Brevo API key configuration
+if (process.env.BREVO_API_KEY) {
+  const key = process.env.BREVO_API_KEY;
+  const looksValid = (key.startsWith('xsmtpsib-') || key.startsWith('xkeysib-')) && key.length > 20 && key === key.trim();
   console.log(
-    `📨 RESEND_API_KEY loaded: prefix="${key.slice(0, 5)}..." length=${key.length} hasWhitespace=${key !== key.trim()} looksValid=${looksValid}`
+    `📨 BREVO_API_KEY loaded: prefix="${key.slice(0, 9)}..." length=${key.length} hasWhitespace=${key !== key.trim()} looksValid=${looksValid}`
   );
 } else {
-  console.error('❌ RESEND_API_KEY is not set at all.');
+  console.error('❌ BREVO_API_KEY is not set at all.');
 }
+
 
 // Start listening
 app.listen(PORT, () => {
