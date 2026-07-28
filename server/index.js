@@ -74,19 +74,10 @@ app.use((err, req, res, next) => {
   });
 });
 
-import { getTransporter } from './controllers/authController.js';
-
-// Perform SMTP startup verification check
-if (process.env.SMTP_HOST && process.env.SMTP_PORT && process.env.SMTP_USER && process.env.SMTP_PASS) {
-  getTransporter()
-    .then(transporter => transporter.verify())
-    .then(() => console.log('✅ SMTP Server connection & credentials verified successfully.'))
-    .catch(err => console.error('❌ SMTP Server Startup Verification Failed:', err.message || err));
-}
-
 // Start listening
 app.listen(PORT, () => {
   console.log(`🚀 CodeLens AI Server is active and listening on port ${PORT}`);
 });
+
 
 

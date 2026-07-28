@@ -1,49 +1,11 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import { supabase } from '../lib/supabase.js';
 import { JWT_SECRET } from '../lib/env.js';
 
-
-// Helper: Setup Nodemailer Transporter dynamically
-export const getTransporter = async () => {
-  const host = process.env.SMTP_HOST;
-  const rawPort = process.env.SMTP_PORT;
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-
-  if (host && rawPort && user && pass) {
-    const port = parseInt(rawPort, 10);
-    return nodemailer.createTransport({
-      host,
-      port,
-      secure: port === 465,
-      auth: { user, pass },
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 10000
-    });
-  }
-
-
-
-  // Fallback for non-production / local testing: Dynamic Ethereal Test SMTP
-  console.log("\n======================================================================");
-  console.log("ℹ️ Generating temporary Ethereal account...");
-  const testAccount = await nodemailer.createTestAccount();
-  console.log(`🔑 Ethereal Test Account: User="${testAccount.user}" Pass="${testAccount.pass}"`);
-  console.log("======================================================================\n");
-
-  return nodemailer.createTransport({
-    host: 'smtp.ethereal.email',
-    port: 587,
-    secure: false,
-    auth: {
-      user: testAccount.user,
-      pass: testAccount.pass
-    }
-  });
-};
+// Lazily initialize Resend instance
+const getResendClient = () => new Resend(process.env.RESEND_API_KEY);
 
 
 // Helper: Standard DB table error handler
@@ -120,18 +82,11 @@ export const signup = async (req, res) => {
 
     if (otpErr) return handleDbError(otpErr, res);
 
-    // Dispatch OTP via Nodemailer SMTP
-    const transporter = await getTransporter();
+    // Dispatch OTP via Resend HTTP API
+    const resend = getResendClient();
+    const { data, error } = await resend.emails.send({
 
-    // Gmail's SMTP relay silently drops or flags mail when From header doesn't match the authenticated SMTP_USER account
-
-    const defaultFrom = process.env.SMTP_USER 
-      ? `"CodeLens AI" <${process.env.SMTP_USER}>` 
-      : '"CodeLens AI" <gatekeeper@codelens.ai>';
-    const fromAddress = process.env.SMTP_FROM || defaultFrom;
-
-    const mailOptions = {
-      from: fromAddress,
+      from: process.env.RESEND_FROM || 'CodeLens AI <onboarding@resend.dev>',
       to: email.trim().toLowerCase(),
       subject: '🔑 Your CodeLens AI Verification OTP',
       html: `
@@ -148,41 +103,25 @@ export const signup = async (req, res) => {
           <p style="font-size: 12px; color: #64748b; text-align: center; margin-top: 30px;">This verification code will expire in 15 minutes. If you did not trigger this request, please disregard this email.</p>
         </div>
       `
-    };
+    });
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log("📧 Verification OTP dispatched successfully:", info.messageId);
+    if (error) {
+      console.error('❌ Resend Email Error:', error);
+      return res.status(500).json({ error: 'Failed to send verification email: ' + error.message });
+    }
 
-    // If using Ethereal, log preview URL
-    const previewUrl = nodemailer.getTestMessageUrl(info);
+    console.log('📧 Verification OTP dispatched successfully via Resend:', data.id);
 
     return res.status(200).json({ 
       message: "Verification OTP dispatched successfully!",
-      previewUrl: previewUrl || null 
+      previewUrl: null 
     });
   } catch (err) {
-    console.error("Signup Error Details:", {
-      message: err.message,
-      code: err.code,
-      response: err.response,
-      responseCode: err.responseCode
-    });
-
-    let errorMessage = `Failed to send verification email: ${err.message || 'Unknown error'}`;
-
-    if (err.code === 'EAUTH') {
-      errorMessage = "SMTP authentication failed — check that SMTP_USER is your full Gmail address and SMTP_PASS is a 16-character App Password (not your regular Gmail password).";
-    } else if (err.code === 'ETIMEDOUT' || err.code === 'ESOCKET') {
-      errorMessage = "Could not reach the SMTP server — check SMTP_HOST/SMTP_PORT, and confirm your network or hosting provider isn't blocking outbound port 587/465 (common on some cloud hosts and university/corporate networks).";
-    } else if (err.responseCode === 535) {
-      errorMessage = "Gmail rejected the credentials — regenerate your App Password at myaccount.google.com/apppasswords and confirm 2-Step Verification is enabled on that Google account.";
-    } else if (err.response) {
-      errorMessage = `Failed to send verification email: ${err.message} (${err.response})`;
-    }
-
-    return res.status(500).json({ error: errorMessage });
+    console.error("Signup Crash Error:", err);
+    return res.status(500).json({ error: err.message || "Unable to complete registration." });
   }
 };
+
 
 
 // 2. VERIFY 6-DIGIT OTP

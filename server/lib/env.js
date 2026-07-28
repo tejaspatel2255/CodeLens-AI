@@ -13,7 +13,9 @@ const requiredEnvVars = [
   'GROQ_API_KEY',
   'SUPABASE_URL',
   'SUPABASE_SERVICE_ROLE_KEY',
+  'RESEND_API_KEY',
 ];
+
 
 export const validateEnv = () => {
   const missing = [];
