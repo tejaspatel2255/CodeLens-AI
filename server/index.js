@@ -24,7 +24,11 @@ import generateRouter from './routes/generate.js';
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust reverse proxy headers (required for Render / Vercel rate limiters)
+app.set('trust proxy', 1);
+
 // Security HTTP headers
+
 app.use(helmet());
 
 // Parse CORS allowed origins from environment variable
@@ -74,10 +78,22 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Startup diagnostic for Resend API key configuration
+if (process.env.RESEND_API_KEY) {
+  const key = process.env.RESEND_API_KEY;
+  const looksValid = key.startsWith('re_') && key.length > 20 && key === key.trim();
+  console.log(
+    `📨 RESEND_API_KEY loaded: prefix="${key.slice(0, 5)}..." length=${key.length} hasWhitespace=${key !== key.trim()} looksValid=${looksValid}`
+  );
+} else {
+  console.error('❌ RESEND_API_KEY is not set at all.');
+}
+
 // Start listening
 app.listen(PORT, () => {
   console.log(`🚀 CodeLens AI Server is active and listening on port ${PORT}`);
 });
+
 
 
 
