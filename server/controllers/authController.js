@@ -19,11 +19,12 @@ export const getTransporter = async () => {
       port,
       secure: port === 465,
       auth: { user, pass },
-      connectionTimeout: 3000,
-      greetingTimeout: 3000,
-      socketTimeout: 3000
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000
     });
   }
+
 
 
   // Fallback for non-production / local testing: Dynamic Ethereal Test SMTP
@@ -149,28 +150,40 @@ export const signup = async (req, res) => {
       `
     };
 
-    // Dispatch OTP asynchronously so registration UI returns immediately (<100ms)
-    transporter.sendMail(mailOptions).then(info => {
-      console.log("📧 Verification OTP dispatched successfully:", info.messageId);
-    }).catch(sendErr => {
-      console.error("❌ Background Email Dispatch Error:", sendErr.message || sendErr);
-    });
+    const info = await transporter.sendMail(mailOptions);
+    console.log("📧 Verification OTP dispatched successfully:", info.messageId);
+
+    // If using Ethereal, log preview URL
+    const previewUrl = nodemailer.getTestMessageUrl(info);
 
     return res.status(200).json({ 
       message: "Verification OTP dispatched successfully!",
-      previewUrl: null 
+      previewUrl: previewUrl || null 
     });
   } catch (err) {
-
     console.error("Signup Error Details:", {
       message: err.message,
       code: err.code,
       response: err.response,
       responseCode: err.responseCode
     });
-    return res.status(500).json({ error: err.message || "Unable to complete registration." });
+
+    let errorMessage = `Failed to send verification email: ${err.message || 'Unknown error'}`;
+
+    if (err.code === 'EAUTH') {
+      errorMessage = "SMTP authentication failed — check that SMTP_USER is your full Gmail address and SMTP_PASS is a 16-character App Password (not your regular Gmail password).";
+    } else if (err.code === 'ETIMEDOUT' || err.code === 'ESOCKET') {
+      errorMessage = "Could not reach the SMTP server — check SMTP_HOST/SMTP_PORT, and confirm your network or hosting provider isn't blocking outbound port 587/465 (common on some cloud hosts and university/corporate networks).";
+    } else if (err.responseCode === 535) {
+      errorMessage = "Gmail rejected the credentials — regenerate your App Password at myaccount.google.com/apppasswords and confirm 2-Step Verification is enabled on that Google account.";
+    } else if (err.response) {
+      errorMessage = `Failed to send verification email: ${err.message} (${err.response})`;
+    }
+
+    return res.status(500).json({ error: errorMessage });
   }
 };
+
 
 // 2. VERIFY 6-DIGIT OTP
 
