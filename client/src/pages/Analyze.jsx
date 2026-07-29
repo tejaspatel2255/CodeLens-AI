@@ -449,7 +449,10 @@ export default function Analyze() {
                   flow={currentAnalysis.flow}
                   concepts={currentAnalysis.concepts}
                   optimizations={currentAnalysis.optimizations}
+                  steps={currentAnalysis.steps}
+                  complexity={currentAnalysis.complexity}
                 />
+
 
                 {/* 2. Switcher Tabs (Detailed Traces vs Visual Sandbox vs Test Cases) */}
                 {currentAnalysis.steps && currentAnalysis.steps.length > 0 && (

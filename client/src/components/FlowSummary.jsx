@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Network, Zap, Sparkles, Volume2, VolumeX, GraduationCap } from 'lucide-react';
+import { Network, Zap, Sparkles, Volume2, VolumeX, GraduationCap, Cpu, HardDrive } from 'lucide-react';
 import ConceptTags from './ConceptTags';
 
-export default function FlowSummary({ flow, concepts = [], optimizations = [], steps = [] }) {
+export default function FlowSummary({ flow, concepts = [], optimizations = [], steps = [], complexity }) {
+
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isSpeakingDetailed, setIsSpeakingDetailed] = useState(false);
 
@@ -178,7 +179,26 @@ export default function FlowSummary({ flow, concepts = [], optimizations = [], s
       </div>
 
       <div className="space-y-6">
+        {/* Time & Space Complexity Badges */}
+        {complexity && (complexity.time || complexity.space) && (
+          <div className="flex items-center gap-3 flex-wrap pt-1">
+            {complexity.time && (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-accentCyan/10 border border-accentCyan/30 text-accentCyan text-xs font-mono font-black" title={complexity.timeExplanation || "Time Complexity"}>
+                <Cpu className="h-3.5 w-3.5" />
+                <span>Time: {complexity.time}</span>
+              </div>
+            )}
+            {complexity.space && (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-accentPurple/10 border border-accentPurple/30 text-accentPurple text-xs font-mono font-black" title={complexity.spaceExplanation || "Space Complexity"}>
+                <HardDrive className="h-3.5 w-3.5" />
+                <span>Space: {complexity.space}</span>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* 1. Execution Flow Blockquote */}
+
         {flow && (
           <div className="relative pl-5 border-l-2 border-accentPurple bg-accentPurple/5 rounded-r-xl p-4 shadow-sm border border-border/20">
             <span className="absolute -left-1.5 -top-1 bg-background text-accentPurple text-[10px] font-black uppercase tracking-wider px-1">
