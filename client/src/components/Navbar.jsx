@@ -32,17 +32,18 @@ export default function Navbar() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo / Branding */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center gap-2 group">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-accentCyan to-accentPurple p-[1px] shadow-lg shadow-accentCyan/10 transition-all duration-300 group-hover:scale-105">
-                <div className="flex h-full w-full items-center justify-center rounded-[7px] bg-background overflow-hidden">
-                  <img src="/codelens_logo.png" alt="CodeLens Logo" className="h-6 w-6 object-contain" />
+            <Link to="/" className="flex items-center gap-2.5 group">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-accentCyan to-accentPurple p-[1px] shadow-lg shadow-accentCyan/15 transition-all duration-300 group-hover:scale-105">
+                <div className="flex h-full w-full items-center justify-center rounded-[11px] bg-background/90 overflow-hidden backdrop-blur-sm">
+                  <img src="/codelens_logo.png" alt="CodeLens Logo" className="h-8 w-8 object-contain transition-transform group-hover:scale-110" />
                 </div>
               </div>
-              <span className="font-heading text-lg font-extrabold tracking-wide bg-gradient-to-r from-accentCyan via-textMain to-accentPurple bg-clip-text text-transparent group-hover:opacity-90 transition-opacity">
+              <span className="font-heading text-xl font-extrabold tracking-wide bg-gradient-to-r from-accentCyan via-textMain to-accentPurple bg-clip-text text-transparent group-hover:opacity-90 transition-opacity">
                 CodeLens <span className="text-accentCyan font-body font-light">AI</span>
               </span>
             </Link>
           </div>
+
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">
