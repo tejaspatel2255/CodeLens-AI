@@ -90,7 +90,9 @@ export const AppProvider = ({ children }) => {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`${getApiUrl()}/api/history/${analysisId}`, {
+      const url = `${getApiUrl()}/api/history/${analysisId}?sessionId=${encodeURIComponent(sessionId || '')}`;
+
+      const response = await fetch(url, {
         method: 'DELETE',
         headers
       });
@@ -116,7 +118,14 @@ export const AppProvider = ({ children }) => {
   // Fetch a shared analysis by its DB row ID
   const fetchAnalysisById = async (analysisId) => {
     try {
-      const response = await fetch(`${getApiUrl()}/api/history/detail/${analysisId}`);
+      const token = localStorage.getItem('codelens_auth_token');
+      const headers = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${getApiUrl()}/api/history/detail/${analysisId}`, { headers });
+
       
       if (!response.ok) {
         throw new Error('Shared analysis not found or server is offline');

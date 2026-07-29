@@ -110,14 +110,20 @@ export const signup = async (req, res) => {
       const errBody = await brevoRes.json().catch(() => ({}));
       console.error('❌ Brevo Email Error:', brevoRes.status, errBody);
 
-      // Graceful fallback if Brevo account is pending activation: log OTP and return friendly message
+      // Graceful fallback if Brevo account is pending activation
       if (brevoRes.status === 403 || (errBody.message && errBody.message.includes('not yet activated'))) {
         console.warn(`⚠️ [PENDING ACTIVATION FALLBACK] Brevo account pending activation. Your registration OTP code for ${email} is: [ ${otp} ]`);
+        
+        // In development / non-production environments, expose OTP in message for easy testing
+        const isDev = process.env.NODE_ENV !== 'production' || process.env.ALLOW_OTP_DEV_FALLBACK === 'true';
         return res.status(200).json({
-          message: `Verification OTP generated! (Brevo pending activation - Your OTP Code is: ${otp})`,
+          message: isDev 
+            ? `Verification OTP generated! (Brevo pending activation - Your OTP Code is: ${otp})`
+            : `Verification OTP generated! Brevo account is currently completing 1-time activation review. Please check server logs or try again shortly.`,
           previewUrl: null
         });
       }
+
 
       return res.status(500).json({
         error: 'Failed to send verification email: ' + (errBody.message || brevoRes.statusText)
