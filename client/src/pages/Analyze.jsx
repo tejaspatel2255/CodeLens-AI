@@ -26,8 +26,11 @@ import {
   Code,
   Volume2,
   Download,
-  FileText
+  FileText,
+  Activity,
+  Zap
 } from 'lucide-react';
+
 
 export default function Analyze() {
   const {
@@ -478,7 +481,17 @@ export default function Analyze() {
                     >
                       Test Cases
                     </button>
+                    <button
+                      onClick={() => setActiveTab('benchmark')}
+                      className={`flex-1 py-3 px-3 sm:px-4 rounded-lg font-heading text-xs font-black uppercase tracking-widest transition-all cursor-pointer border ${activeTab === 'benchmark'
+                        ? 'bg-accentPurple/15 border-accentPurple/40 text-accentPurple shadow-[0_0_15px_rgba(124,109,250,0.15)]'
+                        : 'border-transparent text-mutedMain hover:text-textMain hover:bg-surface2/40'
+                        }`}
+                    >
+                      Benchmark
+                    </button>
                   </div>
+
                 )}
 
 
@@ -786,6 +799,66 @@ export default function Analyze() {
                     )}
                   </div>
                 )}
+
+                {/* TAB 4 CONTENT: Complexity Benchmark Comparator */}
+                {activeTab === 'benchmark' && (
+                  <div className="glass-card rounded-2xl border border-border/80 p-6 bg-surface shadow-2xl space-y-6 text-left animate-fade-in">
+
+                    <div className="flex items-center justify-between border-b border-border/40 pb-4">
+                      <div>
+                        <h4 className="font-heading text-sm font-extrabold uppercase tracking-widest text-accentPurple flex items-center gap-2">
+                          <Activity className="h-4.5 w-4.5 text-accentPurple" /> Time & Space Complexity Benchmark
+                        </h4>
+                        <p className="text-[10px] text-mutedMain">Algorithmic Asymptotic Growth Analysis & Optimization Bounds</p>
+                      </div>
+                      <span className="text-[10px] font-mono bg-accentPurple/10 border border-accentPurple/20 text-accentPurple px-2.5 py-1 rounded-full opacity-90 font-bold uppercase flex items-center gap-1">
+                        <Zap className="h-3 w-3 fill-accentPurple" /> Benchmark Active
+                      </span>
+                    </div>
+
+                    {/* Complexity Gauge Metrics */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Time Complexity Card */}
+                      <div className="rounded-xl border border-accentCyan/30 bg-accentCyan/5 p-5 space-y-2 relative overflow-hidden">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-accentCyan">Time Complexity</span>
+                          <span className="text-[9px] font-mono bg-accentCyan/20 text-accentCyan px-2 py-0.5 rounded font-bold">CPU Scaling</span>
+                        </div>
+                        <div className="text-3xl font-code font-black text-accentCyan">
+                          {currentAnalysis.complexity?.time || 'O(N)'}
+                        </div>
+                        <p className="text-xs text-textMain/80 leading-relaxed font-body">
+                          {currentAnalysis.complexity?.timeExplanation || 'Linear execution time directly proportional to input size N.'}
+                        </p>
+                      </div>
+
+                      {/* Space Complexity Card */}
+                      <div className="rounded-xl border border-accentPurple/30 bg-accentPurple/5 p-5 space-y-2 relative overflow-hidden">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-accentPurple">Space Complexity</span>
+                          <span className="text-[9px] font-mono bg-accentPurple/20 text-accentPurple px-2 py-0.5 rounded font-bold">RAM Allocation</span>
+                        </div>
+                        <div className="text-3xl font-code font-black text-accentPurple">
+                          {currentAnalysis.complexity?.space || 'O(1)'}
+                        </div>
+                        <p className="text-xs text-textMain/80 leading-relaxed font-body">
+                          {currentAnalysis.complexity?.spaceExplanation || 'Constant auxiliary memory footprint during execution.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Optimal Comparison Box */}
+                    <div className="rounded-xl border border-border/60 bg-background/60 p-4 space-y-2">
+                      <h5 className="text-xs font-bold uppercase tracking-wider text-accentYellow flex items-center gap-1.5">
+                        <span className="h-2 w-2 rounded-full bg-accentYellow" /> Optimal Solution Comparison
+                      </h5>
+                      <p className="text-xs text-textMain/80 leading-relaxed font-body">
+                        {currentAnalysis.complexity?.optimalComparison || 'This code is currently running near theoretical algorithmic bounds.'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
 
 
                 {/* 3. Bug Card Reports (always visible on results tab toggle) */}

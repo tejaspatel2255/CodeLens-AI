@@ -31,7 +31,15 @@ Return exactly this structure:
     "optimization tip 2"
   ],
   "concepts": ["concept1", "concept2", "concept3"],
+  "complexity": {
+    "time": "O(N log N)",
+    "space": "O(N)",
+    "timeExplanation": "Brief explanation of why this code has this time complexity",
+    "spaceExplanation": "Brief explanation of why this code has this space complexity",
+    "optimalComparison": "Compare with optimal approach (e.g., 'Currently optimal' or 'Can be improved to O(N) using Hash Map')"
+  },
   "testCases": [
+
     {
       "name": "Standard Input Case",
       "input": "sample input params",
