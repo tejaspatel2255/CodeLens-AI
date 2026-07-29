@@ -33,15 +33,16 @@ export default function Navbar() {
           {/* Logo / Branding */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center gap-2.5 group">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-accentCyan to-accentPurple p-[1px] shadow-lg shadow-accentCyan/15 transition-all duration-300 group-hover:scale-105">
-                <div className="flex h-full w-full items-center justify-center rounded-[11px] bg-background/90 overflow-hidden backdrop-blur-sm">
-                  <img src="/codelens_logo.png" alt="CodeLens Logo" className="h-8 w-8 object-contain transition-transform group-hover:scale-110" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-accentCyan to-accentPurple p-[1px] shadow-lg shadow-accentCyan/20 transition-all duration-300 group-hover:scale-105">
+                <div className="flex h-full w-full items-center justify-center rounded-[11px] bg-background/90 overflow-hidden backdrop-blur-sm p-1">
+                  <img src="/codelens_logo.svg" alt="CodeLens Logo" className="h-full w-full object-contain transition-transform group-hover:scale-110" />
                 </div>
               </div>
               <span className="font-heading text-xl font-extrabold tracking-wide bg-gradient-to-r from-accentCyan via-textMain to-accentPurple bg-clip-text text-transparent group-hover:opacity-90 transition-opacity">
                 CodeLens <span className="text-accentCyan font-body font-light">AI</span>
               </span>
             </Link>
+
           </div>
 
 
