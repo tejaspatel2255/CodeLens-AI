@@ -24,7 +24,9 @@ import {
   Cpu,
   Box,
   Code,
-  Volume2
+  Volume2,
+  Download,
+  FileText
 } from 'lucide-react';
 
 export default function Analyze() {
@@ -49,6 +51,92 @@ export default function Analyze() {
 
   const resultsRef = useRef(null);
   const stepsContainerRef = useRef(null);
+
+  // Export PDF / Print Report Generator
+  const handleExportPDF = () => {
+    if (!currentAnalysis) return;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      showToast('Pop-up blocked. Please allow pop-ups to print/export PDF.');
+      return;
+    }
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>CodeLens AI - Analysis Report (${currentAnalysis.language || 'Code'})</title>
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; }
+          h1 { color: #0284c7; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 5px; }
+          .subtitle { color: #64748b; font-size: 14px; margin-bottom: 30px; }
+          .section { margin-bottom: 30px; }
+          .section-title { font-size: 16px; font-weight: bold; text-transform: uppercase; color: #475569; letter-spacing: 1px; margin-bottom: 10px; }
+          .code-box { background: #0f172a; color: #f8fafc; padding: 16px; border-radius: 8px; font-family: monospace; white-space: pre-wrap; font-size: 13px; }
+          .step-card { border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; margin-bottom: 12px; background: #f8fafc; }
+          .step-num { font-weight: bold; color: #0284c7; }
+          .bug-card { border: 1px solid #fca5a5; background: #fff1f2; padding: 16px; border-radius: 8px; margin-bottom: 12px; }
+          .bug-title { color: #e11d48; font-weight: bold; }
+          .badge { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-right: 6px; }
+          @media print { body { padding: 0; } }
+        </style>
+      </head>
+      <body>
+        <h1>CodeLens AI — Debugging & Trace Report</h1>
+        <div class="subtitle">Generated on ${new Date().toLocaleDateString()} | Programming Language: <strong>${currentAnalysis.language || 'Detected'}</strong></div>
+
+        <div class="section">
+          <div class="section-title">1. Execution Flow Overview</div>
+          <p>${currentAnalysis.flow || 'No summary available.'}</p>
+          <div>
+            ${(currentAnalysis.concepts || []).map(c => `<span class="badge">${c}</span>`).join('')}
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">2. Original Source Code</div>
+          <div class="code-box">${(currentAnalysis.original_code || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+        </div>
+
+        ${(currentAnalysis.bugs && currentAnalysis.bugs.length > 0) ? `
+          <div class="section">
+            <div class="section-title">3. Detected Bugs (${currentAnalysis.bugs.length})</div>
+            ${currentAnalysis.bugs.map((b, i) => `
+              <div class="bug-card">
+                <div class="bug-title">Defect #${i + 1}: ${b.issue}</div>
+                <p><strong>Buggy Line:</strong> <code>${b.line}</code></p>
+                <p><strong>Suggested Fix:</strong> <code>${b.fix}</code></p>
+                <p><strong>Reason:</strong> ${b.why || 'N/A'}</p>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+
+        <div class="section">
+          <div class="section-title">4. Step-by-Step Execution Traces</div>
+          ${(currentAnalysis.steps || []).map(s => `
+            <div class="step-card">
+              <span class="step-num">Step #${s.step}: ${s.title || ''}</span>
+              <p><strong>Executing Line:</strong> <code>${s.line}</code></p>
+              <p><strong>Explanation:</strong> ${s.explanation}</p>
+              <p><strong>Under the Hood:</strong> ${s.backend || 'N/A'}</p>
+              ${s.analogy ? `<p><em>Analogy: ${s.analogy}</em></p>` : ''}
+            </div>
+          `).join('')}
+        </div>
+
+        <script>
+          window.onload = function() { window.print(); }
+        </script>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+  };
+
 
   // 1. Process Shared ID Query Parameter (?id=...) on Mount
   useEffect(() => {
@@ -295,7 +383,17 @@ export default function Analyze() {
           </div>
 
           {/* Quick buttons */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            {currentAnalysis && (
+              <button
+                onClick={handleExportPDF}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-accentPurple/30 bg-accentPurple/10 hover:bg-accentPurple/20 text-xs font-semibold text-accentPurple uppercase tracking-widest transition-all cursor-pointer shadow-[0_0_15px_rgba(124,109,250,0.15)]"
+                title="Export report as PDF / Print document"
+              >
+                <Download className="h-4 w-4" />
+                <span>Export PDF</span>
+              </button>
+            )}
             {currentAnalysis && currentAnalysis.id && (
               <button
                 onClick={handleShare}
@@ -314,6 +412,7 @@ export default function Analyze() {
               <span>Logs</span>
             </button>
           </div>
+
         </div>
 
         {/* Global Error Banner */}
