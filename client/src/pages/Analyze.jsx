@@ -7,6 +7,8 @@ import FlowSummary from '../components/FlowSummary';
 import StepCard from '../components/StepCard';
 import BugCard from '../components/BugCard';
 import LoadingAnimation from '../components/LoadingAnimation';
+import ChatAssistant from '../components/ChatAssistant';
+
 import {
   HelpCircle,
   Share2,
@@ -735,6 +737,10 @@ export default function Analyze() {
           <span>{toastMsg}</span>
         </div>
       )}
+
+      {/* Floating Interactive AI Chat Drawer */}
+      <ChatAssistant codeContext={currentAnalysis?.original_code || ''} />
     </div>
   );
 }
+

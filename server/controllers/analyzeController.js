@@ -133,3 +133,62 @@ export const analyzeCode = async (req, res) => {
     return res.status(500).json({ error: error.message || 'An error occurred during code analysis.' });
   }
 };
+
+export const askAssistant = async (req, res) => {
+  const { question, codeContext, history } = req.body;
+
+  if (!question || typeof question !== 'string' || !question.trim()) {
+    return res.status(400).json({ error: 'Question cannot be empty' });
+  }
+
+  const groqApiKey = process.env.GROQ_API_KEY?.trim();
+  if (!groqApiKey) {
+    return res.status(500).json({ error: 'GROQ_API_KEY is not configured.' });
+  }
+
+  const systemMessage = `You are CodeLens AI Assistant — an encouraging, clear programming tutor helping a developer understand their code.
+Answer the user's question directly, clearly, and accurately based on their code context. Keep answers formatted nicely with Markdown syntax highlighting where helpful.`;
+
+  const messages = [
+    { role: 'system', content: systemMessage },
+    { role: 'user', content: `Active Code Context:\n${codeContext || 'No code provided.'}` }
+  ];
+
+  if (Array.isArray(history)) {
+    history.forEach(item => {
+      messages.push({ role: item.sender === 'user' ? 'user' : 'assistant', content: item.text });
+    });
+  }
+
+  messages.push({ role: 'user', content: question });
+
+  try {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${groqApiKey}`
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages,
+        temperature: 0.4,
+        max_tokens: 1500
+      })
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      return res.status(502).json({ error: 'Failed to contact AI tutor engine.' });
+    }
+
+    const data = await response.json();
+    const reply = data.choices?.[0]?.message?.content || 'I could not process that request.';
+
+    return res.status(200).json({ reply });
+  } catch (err) {
+    console.error('Ask Assistant Error:', err);
+    return res.status(500).json({ error: 'Error processing question.' });
+  }
+};
+
