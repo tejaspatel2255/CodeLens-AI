@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FileCode, Clipboard, Copy, Trash2, Check, Sparkles, Terminal } from 'lucide-react';
+import { FileCode, Clipboard, Copy, Trash2, Check, Sparkles, Terminal, RefreshCw } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -12,14 +12,43 @@ const LANGUAGE_PILLS = [
 ];
 
 export default function CodeEditor({ onAnalyze, loading, activeLine }) {
-  const { currentAnalysis, setCurrentAnalysis, user } = useApp();
+  const { currentAnalysis, setCurrentAnalysis, user, getApiUrl } = useApp();
   const navigate = useNavigate();
   const [code, setCode] = useState('');
   const [copied, setCopied] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [detectedLang, setDetectedLang] = useState('');
   const [manualLang, setManualLang] = useState('');
+  const [converting, setConverting] = useState(false);
   const textareaRef = useRef(null);
+
+  const handleConvertCode = async (targetLang) => {
+    if (!code.trim()) return;
+    setConverting(true);
+    showToast(`Converting code to ${targetLang}...`);
+    try {
+      const res = await fetch(`${getApiUrl()}/api/generate/convert`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code,
+          sourceLanguage: activeLang,
+          targetLanguage: targetLang
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to convert');
+      
+      setCode(data.convertedCode);
+      setManualLang(targetLang);
+      showToast(`Successfully converted to ${targetLang}!`);
+    } catch (err) {
+      showToast(err.message || 'Conversion error');
+    } finally {
+      setConverting(false);
+    }
+  };
+
 
   // Auto-reload code when a history item is selected for re-use
   useEffect(() => {
@@ -214,7 +243,33 @@ export default function CodeEditor({ onAnalyze, loading, activeLine }) {
         </div>
 
         {/* Action button tools */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
+          {code.trim() && !currentAnalysis && (
+            <div className="relative group">
+              <button
+                disabled={converting}
+                className="px-2.5 py-1 rounded-lg bg-accentPurple/10 hover:bg-accentPurple/20 border border-accentPurple/30 text-accentPurple font-heading text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1 cursor-pointer disabled:opacity-40"
+                title="Transpile code into another programming language"
+              >
+                <RefreshCw className={`h-3 w-3 ${converting ? 'animate-spin' : ''}`} />
+                <span>Convert</span>
+              </button>
+              <div className="absolute right-0 top-full mt-1 w-36 bg-surface border border-border/80 rounded-xl shadow-2xl p-1 hidden group-hover:block z-30 animate-fade-in">
+                <span className="text-[9px] uppercase font-mono font-bold text-mutedMain px-2 py-1 block border-b border-border/40">Convert To:</span>
+                {['C++', 'Java', 'Python', 'JavaScript'].map((langOption) => (
+                  <button
+                    key={langOption}
+                    onClick={() => handleConvertCode(langOption)}
+                    disabled={activeLang === langOption || converting}
+                    className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-code text-textMain hover:bg-accentPurple/15 hover:text-accentPurple disabled:opacity-30 transition-colors cursor-pointer"
+                  >
+                    {langOption}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <button
             onClick={handlePaste}
             className="p-1.5 rounded-lg text-mutedMain hover:text-textMain hover:bg-surface2 transition-all"
@@ -222,6 +277,7 @@ export default function CodeEditor({ onAnalyze, loading, activeLine }) {
           >
             <Clipboard className="h-4 w-4" />
           </button>
+
           <button
             onClick={handleCopy}
             disabled={!code.trim()}

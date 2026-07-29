@@ -134,3 +134,54 @@ export const generateCode = async (req, res) => {
     clearTimeout(timeoutId);
   }
 };
+
+export const convertCode = async (req, res) => {
+  const { code, sourceLanguage, targetLanguage } = req.body;
+
+  if (!code || typeof code !== 'string' || !code.trim()) {
+    return res.status(400).json({ error: 'Source code content cannot be empty' });
+  }
+  if (!targetLanguage) {
+    return res.status(400).json({ error: 'Target language must be specified' });
+  }
+
+  const groqApiKey = process.env.GROQ_API_KEY?.trim();
+  if (!groqApiKey) {
+    return res.status(500).json({ error: 'GROQ_API_KEY is not configured.' });
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 60000);
+
+  const convertSystemPrompt = `You are an expert multi-language polyglot compiler and transpiler. Convert the given code into ${targetLanguage} cleanly, idiomatically, and preserving exact logic. Return ONLY valid JSON:
+{
+  "convertedCode": "the transpiled code string",
+  "explanation": "brief description of key syntax differences converted",
+  "targetLanguage": "${targetLanguage}"
+}`;
+
+  try {
+    const result = await groqJsonCompletion({
+      messages: [
+        { role: 'system', content: convertSystemPrompt },
+        { role: 'user', content: `Source Language: ${sourceLanguage || 'Auto-detect'}\n\nCode to convert:\n${code}` }
+      ],
+      temperature: 0.1,
+      max_tokens: 4096,
+      model: process.env.GROQ_GENERATE_MODEL?.trim() || DEFAULT_GENERATE_MODEL,
+      signal: controller.signal
+    });
+
+    return res.status(200).json({
+      convertedCode: result.convertedCode || '',
+      explanation: result.explanation || '',
+      targetLanguage: result.targetLanguage || targetLanguage
+    });
+  } catch (err) {
+    console.error('Convert Code Error:', err);
+    return res.status(500).json({ error: err.message || 'Failed to convert code' });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+};
+
