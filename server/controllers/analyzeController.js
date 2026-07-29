@@ -143,24 +143,30 @@ export const askAssistant = async (req, res) => {
 
   const groqApiKey = process.env.GROQ_API_KEY?.trim();
   if (!groqApiKey) {
-    return res.status(500).json({ error: 'GROQ_API_KEY is not configured.' });
+    console.error('Ask Assistant Error: GROQ_API_KEY is missing from server environment.');
+    return res.status(500).json({ error: 'GROQ_API_KEY is not configured on backend.' });
   }
 
   const systemMessage = `You are CodeLens AI Assistant — an encouraging, clear programming tutor helping a developer understand their code.
-Answer the user's question directly, clearly, and accurately based on their code context. Keep answers formatted nicely with Markdown syntax highlighting where helpful.`;
+Answer the user's question directly, clearly, and accurately based on their code context. Keep answers friendly, helpful, and concise.`;
 
   const messages = [
     { role: 'system', content: systemMessage },
-    { role: 'user', content: `Active Code Context:\n${codeContext || 'No code provided.'}` }
+    { role: 'user', content: `Active Code Context:\n\`\`\`\n${codeContext || 'No code currently loaded.'}\n\`\`\`` }
   ];
 
   if (Array.isArray(history)) {
     history.forEach(item => {
-      messages.push({ role: item.sender === 'user' ? 'user' : 'assistant', content: item.text });
+      if (item && item.text) {
+        messages.push({
+          role: item.sender === 'user' ? 'user' : 'assistant',
+          content: String(item.text)
+        });
+      }
     });
   }
 
-  messages.push({ role: 'user', content: question });
+  messages.push({ role: 'user', content: String(question) });
 
   try {
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -170,7 +176,7 @@ Answer the user's question directly, clearly, and accurately based on their code
         "Authorization": `Bearer ${groqApiKey}`
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+        model: process.env.GROQ_GENERATE_MODEL?.trim() || "llama-3.3-70b-versatile",
         messages,
         temperature: 0.4,
         max_tokens: 1500
@@ -179,7 +185,8 @@ Answer the user's question directly, clearly, and accurately based on their code
 
     if (!response.ok) {
       const errText = await response.text();
-      return res.status(502).json({ error: 'Failed to contact AI tutor engine.' });
+      console.error(`Groq API Error in askAssistant (HTTP ${response.status}):`, errText);
+      return res.status(502).json({ error: `Groq API error (${response.status}): ${errText || 'Failed to contact AI tutor.'}` });
     }
 
     const data = await response.json();
@@ -187,8 +194,9 @@ Answer the user's question directly, clearly, and accurately based on their code
 
     return res.status(200).json({ reply });
   } catch (err) {
-    console.error('Ask Assistant Error:', err);
-    return res.status(500).json({ error: 'Error processing question.' });
+    console.error('Ask Assistant Controller Error:', err);
+    return res.status(500).json({ error: err.message || 'Error processing question.' });
   }
 };
+
 

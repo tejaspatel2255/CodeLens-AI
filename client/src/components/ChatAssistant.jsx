@@ -51,12 +51,13 @@ export default function ChatAssistant({ codeContext }) {
     } catch (err) {
       setMessages((prev) => [
         ...prev,
-        { sender: 'assistant', text: 'Sorry, I ran into an issue answering that. Please try again.' }
+        { sender: 'assistant', text: err.message || 'Sorry, I ran into an issue answering that. Please try again.' }
       ]);
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="fixed bottom-6 right-6 z-50 font-body text-left">
