@@ -65,10 +65,12 @@ Thumbs.db
 .next/
 .nuxt/
 
-# ─── Temporary / Test Files ───────────────────────────────────────────────────
+# ─── Temporary / Test Files / Exported PDFs ───────────────────────────────────
 *.tmp
 *.temp
 *.zip
+*.pdf
 coverage/
 .nyc_output/
+
 

@@ -29,7 +29,12 @@ Paste any C, C++, Java, Python, or JavaScript code snippet to receive:
 ### 💬 Interactive AI Chat Assistant ("Ask CodeLens AI")
 - Context-aware floating chat drawer at the bottom-right for 24/7 Q&A based on the active code context.
 
+### ⚙️ Time & Space Complexity Benchmark
+- **Asymptotic Growth Metrics**: Computes $O(N)$, $O(N \log N)$, etc., and auxiliary RAM space bounds.
+- Displays prominent **Time** & **Space** complexity badges at the top execution flow summary and inside a dedicated **Benchmark** dashboard tab.
+
 ### 📤 PDF Report Generator & Export
+
 - Formats analysis results into a clean 1-page report and triggers the native browser print/PDF export dialog.
 
 ### ⚡ AI Code Generator
