@@ -13,7 +13,8 @@ Return exactly this structure:
       "title": "short title of what happens at this step",
       "explanation": "clear simple explanation of what this line does and why",
       "backend": "what happens under the hood — memory allocation, call stack, variable state, CPU behavior",
-      "analogy": "a creative real-world analogy that makes this clear to a 15-year-old"
+      "analogy": "a creative real-world analogy that makes this clear to a 15-year-old",
+      "variables": { "varName1": "value1", "varName2": "value2" }
     }
   ],
   "flow": "3 to 5 sentence description of the full execution flow from start to finish",

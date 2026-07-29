@@ -204,6 +204,30 @@ export default function StepCard({ stepData, language, index }) {
           </div>
         )}
 
+        {/* Live Variable Memory Visualizer */}
+        {stepData.variables && Object.keys(stepData.variables).length > 0 && (
+          <div className="rounded-xl bg-surface2/60 border border-accentCyan/20 p-4 transition-all">
+            <div className="flex items-center justify-between mb-2">
+              <h5 className="text-[10px] uppercase font-extrabold tracking-wider text-accentCyan flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-accentCyan animate-pulse" />
+                Live Variable Memory State (Step #{step})
+              </h5>
+              <span className="text-[9px] font-mono text-mutedMain uppercase">Call Stack Frame</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mt-2">
+              {Object.entries(stepData.variables).map(([key, val]) => (
+                <div key={key} className="p-2 rounded-lg bg-background/80 border border-border/40 font-code text-xs flex flex-col justify-between">
+                  <span className="text-[10px] text-mutedMain font-mono font-bold">{key}</span>
+                  <span className="text-accentCyan font-bold mt-1 text-sm truncate" title={String(val)}>
+                    {typeof val === 'object' ? JSON.stringify(val) : String(val)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+
         {/* Think of it like analogy block */}
         {analogy && (
           <div className="rounded-xl bg-accentYellow/5 border border-accentYellow/10 p-4 flex gap-3.5 items-start">
