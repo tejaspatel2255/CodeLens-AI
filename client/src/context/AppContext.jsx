@@ -197,9 +197,11 @@ export const AppProvider = ({ children }) => {
         fetchAnalysisById,
         deleteHistoryItem,
         sidebarOpen,
-        setSidebarOpen
+        setSidebarOpen,
+        getApiUrl
       }}
     >
+
       {children}
     </AppContext.Provider>
   );
