@@ -6,6 +6,8 @@
 [![React](https://img.shields.io/badge/React-18-blue?style=flat-square&logo=react)](https://react.dev/)
 [![Groq](https://img.shields.io/badge/Groq-LLM-orange?style=flat-square)](https://console.groq.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-teal?style=flat-square&logo=supabase)](https://supabase.com/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+
 
 ---
 
