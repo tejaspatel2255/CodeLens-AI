@@ -127,7 +127,11 @@ export default function Analyze() {
         </div>
 
         <script>
-          window.onload = function() { window.print(); }
+          window.onload = function() {
+            setTimeout(function() {
+              window.print();
+            }, 300);
+          }
         </script>
       </body>
       </html>
@@ -136,6 +140,7 @@ export default function Analyze() {
     printWindow.document.write(htmlContent);
     printWindow.document.close();
   };
+
 
 
   // 1. Process Shared ID Query Parameter (?id=...) on Mount
