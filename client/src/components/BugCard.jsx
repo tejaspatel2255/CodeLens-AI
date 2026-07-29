@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Bug, CheckCircle, ShieldAlert, Sparkles, Copy, Check } from 'lucide-react';
+import { Bug, CheckCircle, ShieldAlert, Sparkles, Copy, Check, Wrench } from 'lucide-react';
 import hljs from 'highlight.js';
 import confetti from 'canvas-confetti';
 
-export default function BugCard({ bugs = [], language }) {
+export default function BugCard({ bugs = [], language, onApplyFix }) {
+
   const [copiedIndex, setCopiedIndex] = useState(null);
 
   // Trigger confetti if clean code (no bugs)
@@ -159,20 +160,34 @@ export default function BugCard({ bugs = [], language }) {
               </div>
             </div>
 
-            {/* 3. Reason description */}
-            {bug.why && (
-              <div className="pt-2">
-                <h5 className="text-xs font-extrabold text-accentCyan uppercase tracking-wide mb-1">
-                  Why this Fix Works
-                </h5>
-                <p className="text-xs text-textMain/80 font-body leading-relaxed bg-surface2/30 rounded-lg p-3 border border-border/40">
-                  {bug.why}
-                </p>
-              </div>
-            )}
+            {/* 3. Reason description & 1-Click Apply Button */}
+            <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              {bug.why && (
+                <div className="flex-1">
+                  <h5 className="text-xs font-extrabold text-accentCyan uppercase tracking-wide mb-1">
+                    Why this Fix Works
+                  </h5>
+                  <p className="text-xs text-textMain/80 font-body leading-relaxed bg-surface2/30 rounded-lg p-3 border border-border/40">
+                    {bug.why}
+                  </p>
+                </div>
+              )}
+
+              {onApplyFix && (
+                <button
+                  onClick={() => onApplyFix(bug.line, bug.fix)}
+                  className="px-4 py-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-background border border-emerald-500/30 text-xs font-heading font-extrabold uppercase tracking-wider transition-all duration-300 shadow-[0_0_15px_rgba(16,185,129,0.15)] flex items-center gap-1.5 shrink-0 cursor-pointer self-end sm:self-center"
+                  title="Apply correction directly to editor"
+                >
+                  <Wrench className="h-3.5 w-3.5" />
+                  <span>Apply Fix (1-Click)</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       ))}
     </div>
   );
 }
+

@@ -579,7 +579,19 @@ export default function Analyze() {
                 <BugCard
                   bugs={currentAnalysis.bugs}
                   language={currentAnalysis.language}
+                  onApplyFix={(buggyLine, fixedLine) => {
+                    if (currentAnalysis && currentAnalysis.original_code) {
+                      const updatedCode = currentAnalysis.original_code.replace(buggyLine, fixedLine);
+                      setCurrentAnalysis({
+                        ...currentAnalysis,
+                        original_code: updatedCode
+                      });
+                      showToast("Applied fix to code! Re-running analysis...");
+                      handleAnalyze(updatedCode, currentAnalysis.language);
+                    }
+                  }}
                 />
+
 
               </div>
             ) : (
