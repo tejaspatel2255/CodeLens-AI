@@ -30,7 +30,21 @@ Return exactly this structure:
     "optimization tip 1",
     "optimization tip 2"
   ],
-  "concepts": ["concept1", "concept2", "concept3"]
+  "concepts": ["concept1", "concept2", "concept3"],
+  "testCases": [
+    {
+      "name": "Standard Input Case",
+      "input": "sample input params",
+      "expectedOutput": "expected return result",
+      "explanation": "why this result is produced"
+    },
+    {
+      "name": "Edge / Boundary Case",
+      "input": "edge condition input (e.g. empty, negative, 0, max value)",
+      "expectedOutput": "expected edge behavior",
+      "explanation": "why boundary testing is important here"
+    }
+  ]
 }
 
 Rules:
