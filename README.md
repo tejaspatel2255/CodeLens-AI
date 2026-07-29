@@ -9,37 +9,41 @@
 
 ---
 
-## ✨ Features
+## ✨ Features & Architecture
 
-### 🧠 Analyze Code
-Paste any code snippet and get a full AI-powered breakdown:
-- Step-by-step execution traces with memory, CPU, and call-stack states
-- Real-world analogies for every line
-- Bug detection with fix suggestions
-- Complexity analysis and optimization tips
+### 🧠 Step-by-Step Code Explainer & Memory State
+Paste any C, C++, Java, Python, or JavaScript code snippet to receive:
+- **Execution Step Traces**: Memory allocation, call stack, CPU behavior, and relatable analogies for every single step.
+- **Live Variable Memory Visualizer**: Real-time stack frame grid showing variable name/value bindings per line of execution.
 
-### ⚡ Generate Code
-Describe a programming problem with specific constraints and the AI generates:
-- Fully correct, runnable code matching every constraint
-- Time & Space complexity analysis
-- A natural language explanation
-- A "Send to Analyzer" button to trace the generated code line-by-line
+### 🐛 Defect Scanner & 1-Click Fix
+- Detects bugs, unexpected side-effects, and off-by-one errors.
+- **1-Click Apply Fix**: Click the fix button directly inside the defect card to swap in the correction and instantly re-run the trace.
 
-### 🗄️ Personal History Archives
-- All analyses are stored per-user in Supabase
-- Authenticated users see **only their own data** — zero data bleed
-- Guest users see 5 static example templates to explore the platform
+### 🧪 Automated Unit Test & Edge Case Generator
+- Generates input/output boundary assertions (Standard case vs. empty/null/max edge conditions) displayed under a dedicated **Test Cases** tab panel.
 
-### 🔐 Secure Authentication
-- OTP email verification via Brevo Transactional REST API (HTTP Port 443)
-- Password hashing with `bcryptjs`
-- JWT-signed session tokens with per-resource authorization checks
-- Graceful activation fallbacks for zero registration downtime
+### 🔀 Multi-Language Code Transpiler
+- Translates source code seamlessly across C++, Java, Python, and JavaScript directly from the Code Editor toolbar without losing logic context.
 
+### 💬 Interactive AI Chat Assistant ("Ask CodeLens AI")
+- Context-aware floating chat drawer at the bottom-right for 24/7 Q&A based on the active code context.
 
-### 🎙️ Voice Tutor
-- AI narrates the execution flow and explains concepts aloud
-- Smart crossfade between narrators — no double-talk bugs
+### 📤 PDF Report Generator & Export
+- Formats analysis results into a clean 1-page report and triggers the native browser print/PDF export dialog.
+
+### ⚡ AI Code Generator
+Describe any programming task to generate clean, production-grade code with time/space complexity metadata.
+
+### 🗄️ Personal History & Shared Logs
+- All analyses are isolated per user in Supabase.
+- Supports secure public/private shareable links with ownership authorization protection.
+
+### 🔐 Hardened Production Security
+- **OTP Auth**: Powered by Brevo REST API over HTTPS (Port 443) with secure production response masking.
+- **API Protection**: Express rate limiting across auth, OTP verification, and AI endpoints.
+- **Error Privacy**: Abort controller timeouts map cleanly to standard `504 Gateway Timeout` responses with sanitized internal stack traces.
+
 
 ---
 
