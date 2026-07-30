@@ -20,9 +20,10 @@ export const analyzeCode = async (req, res) => {
     });
   }
 
-  if (code.length > 20000) {
-    return res.status(400).json({ error: 'Code payload is too large. Maximum allowed size is 20,000 characters per analysis.' });
+  if (code.length > 60000) {
+    return res.status(400).json({ error: 'Code payload is too large. Maximum allowed size is 60,000 characters per analysis.' });
   }
+
 
   if (!sessionId) {
     return res.status(400).json({ error: 'Session ID is required' });

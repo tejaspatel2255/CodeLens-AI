@@ -32,14 +32,26 @@ export default function ProjectScannerModal({ isOpen, onClose, onImportCode }) {
 
       const validExts = ['.js', '.jsx', '.ts', '.tsx', '.py', '.java', '.cpp', '.c', '.h', '.html', '.css', '.json'];
 
+      const MAX_TOTAL_CHARS = 18000;
+      let totalChars = 0;
+
       for (const relativePath of Object.keys(contents.files)) {
         const zipObj = contents.files[relativePath];
         if (zipObj.dir) continue;
-        if (relativePath.includes('node_modules/') || relativePath.includes('.git/')) continue;
+        if (relativePath.includes('node_modules/') || relativePath.includes('.git/') || relativePath.includes('dist/')) continue;
 
         const ext = relativePath.substring(relativePath.lastIndexOf('.')).toLowerCase();
         if (validExts.includes(ext)) {
-          const text = await zipObj.async('text');
+          let text = await zipObj.async('text');
+          
+          // Truncate individual file if project total is getting large
+          if (totalChars + text.length > MAX_TOTAL_CHARS) {
+            const allowed = Math.max(500, MAX_TOTAL_CHARS - totalChars);
+            text = text.substring(0, allowed) + `\n// ... [File truncated for optimal AI trace speed] ...`;
+          }
+
+          totalChars += text.length;
+
           filesList.push({
             path: relativePath,
             size: text.length,
@@ -51,6 +63,8 @@ export default function ProjectScannerModal({ isOpen, onClose, onImportCode }) {
           combinedCode += `// FILE: ${relativePath}\n`;
           combinedCode += `// --------------------------------------------------\n`;
           combinedCode += `${text}\n\n`;
+
+          if (totalChars >= MAX_TOTAL_CHARS) break;
         }
       }
 
@@ -64,6 +78,7 @@ export default function ProjectScannerModal({ isOpen, onClose, onImportCode }) {
         fileCount: filesList.length,
         combinedCode
       });
+
     } catch (err) {
       setError(err.message || "Failed to parse zip archive");
     } finally {
