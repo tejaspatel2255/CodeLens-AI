@@ -133,7 +133,7 @@ export default function FlowSummary({ flow, concepts = [], optimizations = [], s
             <Network className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="font-heading text-lg font-extrabold text-accentPurple uppercase tracking-wide">
+            <h3 className="font-heading text-base sm:text-lg font-bold text-accentPurple uppercase tracking-normal sm:tracking-wide">
               Execution Flow Summary
             </h3>
             <p className="text-xs text-mutedMain font-medium">
@@ -141,6 +141,7 @@ export default function FlowSummary({ flow, concepts = [], optimizations = [], s
             </p>
           </div>
         </div>
+
 
         {/* Audio Explainer Buttons bar */}
         <div className="flex items-center gap-2 flex-wrap">

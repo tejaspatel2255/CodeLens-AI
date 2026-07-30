@@ -10,6 +10,16 @@ export const analyzeCode = async (req, res) => {
     return res.status(400).json({ error: 'Code content cannot be empty' });
   }
 
+  // Code Validation: Check if input contains valid programming constructs or keywords
+  const codePatterns = /[;{}()\[\]=><\+\-\*\/#\$]|function|def|class|var|let|const|import|include|public|private|return|if|else|for|while|struct|void|main/i;
+  const isLikelyCode = codePatterns.test(code) || code.trim().split(/\s+/).length < 5;
+
+  if (!isLikelyCode) {
+    return res.status(400).json({ 
+      error: 'Invalid input. CodeLens AI is designed exclusively for analyzing source code (C, C++, Java, Python, JS, etc.). Plain conversational text or questions are not supported in the code analyzer.' 
+    });
+  }
+
   if (code.length > 20000) {
     return res.status(400).json({ error: 'Code payload is too large. Maximum allowed size is 20,000 characters per analysis.' });
   }
@@ -17,6 +27,7 @@ export const analyzeCode = async (req, res) => {
   if (!sessionId) {
     return res.status(400).json({ error: 'Session ID is required' });
   }
+
 
 
   const groqApiKey = process.env.GROQ_API_KEY?.trim();

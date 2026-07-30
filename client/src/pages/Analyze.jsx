@@ -453,13 +453,13 @@ export default function Analyze() {
                   complexity={currentAnalysis.complexity}
                 />
 
-
-                {/* 2. Switcher Tabs (Detailed Traces vs Visual Sandbox vs Test Cases) */}
+                {/* 2. Switcher Tabs (Detailed Traces vs Visual Sandbox vs Test Cases vs Benchmark) */}
                 {currentAnalysis.steps && currentAnalysis.steps.length > 0 && (
-                  <div className="flex border-b border-border/80 mb-6 bg-surface/30 rounded-t-xl p-1 gap-1">
+
+                  <div className="flex border-b border-border/80 mb-6 bg-surface/30 rounded-t-xl p-1 gap-1 overflow-x-auto custom-scrollbar whitespace-nowrap">
                     <button
                       onClick={() => setActiveTab('traces')}
-                      className={`flex-1 py-3 px-3 sm:px-4 rounded-lg font-heading text-xs font-black uppercase tracking-widest transition-all cursor-pointer border ${activeTab === 'traces'
+                      className={`flex-1 py-2.5 px-3 sm:px-4 rounded-lg font-heading text-[11px] sm:text-xs font-bold uppercase tracking-wider sm:tracking-widest transition-all cursor-pointer border ${activeTab === 'traces'
                         ? 'bg-accentCyan/10 border-accentCyan/30 text-accentCyan shadow-[0_0_15px_rgba(0,245,196,0.05)]'
                         : 'border-transparent text-mutedMain hover:text-textMain hover:bg-surface2/40'
                         }`}
@@ -468,7 +468,7 @@ export default function Analyze() {
                     </button>
                     <button
                       onClick={() => setActiveTab('sandbox')}
-                      className={`flex-1 py-3 px-3 sm:px-4 rounded-lg font-heading text-xs font-black uppercase tracking-widest transition-all cursor-pointer border ${activeTab === 'sandbox'
+                      className={`flex-1 py-2.5 px-3 sm:px-4 rounded-lg font-heading text-[11px] sm:text-xs font-bold uppercase tracking-wider sm:tracking-widest transition-all cursor-pointer border ${activeTab === 'sandbox'
                         ? 'bg-accentCyan/10 border-accentCyan/30 text-accentCyan shadow-[0_0_15px_rgba(0,245,196,0.05)]'
                         : 'border-transparent text-mutedMain hover:text-textMain hover:bg-surface2/40'
                         }`}
@@ -477,7 +477,7 @@ export default function Analyze() {
                     </button>
                     <button
                       onClick={() => setActiveTab('testcases')}
-                      className={`flex-1 py-3 px-3 sm:px-4 rounded-lg font-heading text-xs font-black uppercase tracking-widest transition-all cursor-pointer border ${activeTab === 'testcases'
+                      className={`flex-1 py-2.5 px-3 sm:px-4 rounded-lg font-heading text-[11px] sm:text-xs font-bold uppercase tracking-wider sm:tracking-widest transition-all cursor-pointer border ${activeTab === 'testcases'
                         ? 'bg-accentCyan/10 border-accentCyan/30 text-accentCyan shadow-[0_0_15px_rgba(0,245,196,0.05)]'
                         : 'border-transparent text-mutedMain hover:text-textMain hover:bg-surface2/40'
                         }`}
@@ -486,7 +486,7 @@ export default function Analyze() {
                     </button>
                     <button
                       onClick={() => setActiveTab('benchmark')}
-                      className={`flex-1 py-3 px-3 sm:px-4 rounded-lg font-heading text-xs font-black uppercase tracking-widest transition-all cursor-pointer border ${activeTab === 'benchmark'
+                      className={`flex-1 py-2.5 px-3 sm:px-4 rounded-lg font-heading text-[11px] sm:text-xs font-bold uppercase tracking-wider sm:tracking-widest transition-all cursor-pointer border ${activeTab === 'benchmark'
                         ? 'bg-accentPurple/15 border-accentPurple/40 text-accentPurple shadow-[0_0_15px_rgba(124,109,250,0.15)]'
                         : 'border-transparent text-mutedMain hover:text-textMain hover:bg-surface2/40'
                         }`}
@@ -494,11 +494,11 @@ export default function Analyze() {
                       Benchmark
                     </button>
                   </div>
-
                 )}
 
 
                 {/* TAB 1 CONTENT: Standard Step Cards Visual Breakdowns */}
+
                 {activeTab === 'traces' && currentAnalysis.steps && currentAnalysis.steps.length > 0 && (
                   <div className="space-y-4 animate-fade-in">
                     <div className="flex items-center justify-between mb-4 text-left">
