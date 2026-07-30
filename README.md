@@ -25,7 +25,12 @@ Paste any C, C++, Java, Python, or JavaScript code snippet to receive:
 ### 🧪 Automated Unit Test & Edge Case Generator
 - Generates input/output boundary assertions (Standard case vs. empty/null/max edge conditions) displayed under a dedicated **Test Cases** tab panel.
 
+### 📦 Multi-File Project Import & Zip Scanner
+- Upload local `.zip` archives or specify a public GitHub repository link (`owner/repo`).
+- Automatically unzips and extracts source code files (`.js`, `.ts`, `.py`, `.java`, `.cpp`, etc.), combining them into a unified multi-file execution trace workspace.
+
 ### 🔀 Multi-Language Code Transpiler
+
 - Translates source code seamlessly across C++, Java, Python, and JavaScript directly from the Code Editor toolbar without losing logic context.
 
 ### 💬 Interactive AI Chat Assistant ("Ask CodeLens AI")

@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FileCode, Clipboard, Copy, Trash2, Check, Sparkles, Terminal, RefreshCw } from 'lucide-react';
+import { FileCode, Clipboard, Copy, Trash2, Check, Sparkles, Terminal, RefreshCw, FolderArchive, Layers } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
+import ProjectScannerModal from './ProjectScannerModal';
 
 const LANGUAGE_PILLS = [
+
   { name: 'C', ext: 'c', color: 'text-red-500 bg-red-500/15 border-red-500/30' },
   { name: 'C++', ext: 'cpp', color: 'text-rose-400 bg-rose-400/15 border-rose-400/30' },
   { name: 'Java', ext: 'java', color: 'text-orange-400 bg-orange-400/15 border-orange-400/30' },
@@ -20,7 +22,9 @@ export default function CodeEditor({ onAnalyze, loading, activeLine }) {
   const [detectedLang, setDetectedLang] = useState('');
   const [manualLang, setManualLang] = useState('');
   const [converting, setConverting] = useState(false);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
   const textareaRef = useRef(null);
+
 
   const handleConvertCode = async (targetLang) => {
     if (!code.trim()) return;
@@ -271,12 +275,22 @@ export default function CodeEditor({ onAnalyze, loading, activeLine }) {
           )}
 
           <button
+            onClick={() => setIsScannerOpen(true)}
+            className="px-2.5 py-1 rounded-lg bg-accentCyan/10 hover:bg-accentCyan/20 border border-accentCyan/30 text-accentCyan font-heading text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1 cursor-pointer"
+            title="Import .zip project or public GitHub repo"
+          >
+            <FolderArchive className="h-3 w-3" />
+            <span>Import Project</span>
+          </button>
+
+          <button
             onClick={handlePaste}
             className="p-1.5 rounded-lg text-mutedMain hover:text-textMain hover:bg-surface2 transition-all"
             title="Paste from clipboard"
           >
             <Clipboard className="h-4 w-4" />
           </button>
+
 
           <button
             onClick={handleCopy}
@@ -416,6 +430,17 @@ export default function CodeEditor({ onAnalyze, loading, activeLine }) {
           <span>{toastMessage}</span>
         </div>
       )}
+      {/* Multi-File Project Import & GitHub Zip Scanner Modal */}
+      <ProjectScannerModal
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+        onImportCode={(combinedCode) => {
+          setCode(combinedCode);
+          setManualLang('');
+          showToast("Imported multi-file project workspace!");
+        }}
+      />
     </div>
   );
 }
+
