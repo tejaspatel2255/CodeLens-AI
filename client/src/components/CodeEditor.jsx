@@ -226,18 +226,18 @@ export default function CodeEditor({ onAnalyze, loading, activeLine }) {
         }`}
     >
       {/* Editor Header Tools */}
-      <div className="flex items-center justify-between border-b border-border/80 px-4 py-3 bg-surface/50 rounded-t-2xl">
-        <div className="flex items-center gap-2">
-          <div className="flex gap-1.5">
+      <div className="flex items-center justify-between border-b border-border/80 px-3 sm:px-4 py-2.5 sm:py-3 bg-surface/50 rounded-t-2xl flex-wrap gap-2">
+        <div className="flex items-center gap-2 flex-wrap min-w-0">
+          <div className="flex gap-1.5 shrink-0">
             <span className="h-3 w-3 rounded-full bg-accentRed/80 shadow-[0_0_8px_rgba(255,107,107,0.25)]"></span>
             <span className="h-3 w-3 rounded-full bg-accentYellow/80 shadow-[0_0_8px_rgba(255,217,61,0.25)]"></span>
             <span className="h-3 w-3 rounded-full bg-accentCyan/80 shadow-[0_0_8px_rgba(0,245,196,0.25)]"></span>
           </div>
-          <span className="ml-2 font-code text-xs text-mutedMain flex items-center gap-1.5 uppercase tracking-wider">
-            <FileCode className="h-3.5 w-3.5" /> Workspace.{activeLang ? activeLang.substring(0, 2).toLowerCase() : 'txt'}
+          <span className="font-code text-xs text-mutedMain flex items-center gap-1.5 uppercase tracking-wider truncate">
+            <FileCode className="h-3.5 w-3.5 shrink-0" /> Workspace.{activeLang ? activeLang.substring(0, 2).toLowerCase() : 'txt'}
           </span>
           {currentAnalysis && (
-            <span className="ml-2 text-[9px] px-2 py-0.5 rounded-full bg-accentCyan/10 border border-accentCyan/20 text-accentCyan font-sans font-extrabold uppercase tracking-widest flex items-center gap-1 shadow-sm select-none">
+            <span className="text-[9px] px-2 py-0.5 rounded-full bg-accentCyan/10 border border-accentCyan/20 text-accentCyan font-sans font-extrabold uppercase tracking-widest flex items-center gap-1 shadow-sm select-none shrink-0">
               <span className="relative flex h-1 w-1">
                 <span className="relative inline-flex rounded-full h-1 w-1 bg-accentCyan"></span>
               </span>
@@ -247,7 +247,8 @@ export default function CodeEditor({ onAnalyze, loading, activeLine }) {
         </div>
 
         {/* Action button tools */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap shrink-0">
+
           {code.trim() && !currentAnalysis && (
             <div className="relative group">
               <button
