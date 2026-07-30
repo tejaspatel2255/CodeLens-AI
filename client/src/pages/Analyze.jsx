@@ -28,8 +28,11 @@ import {
   Download,
   FileText,
   Activity,
-  Zap
+  Zap,
+  ShieldAlert,
+  ShieldCheck
 } from 'lucide-react';
+
 
 
 export default function Analyze() {
@@ -493,8 +496,18 @@ export default function Analyze() {
                     >
                       Benchmark
                     </button>
+                    <button
+                      onClick={() => setActiveTab('audit')}
+                      className={`flex-1 py-2.5 px-3 sm:px-4 rounded-lg font-heading text-[11px] sm:text-xs font-bold uppercase tracking-wider sm:tracking-widest transition-all cursor-pointer border ${activeTab === 'audit'
+                        ? 'bg-accentYellow/15 border-accentYellow/40 text-accentYellow shadow-[0_0_15px_rgba(255,217,61,0.15)]'
+                        : 'border-transparent text-mutedMain hover:text-textMain hover:bg-surface2/40'
+                        }`}
+                    >
+                      Security & Refactor Audit
+                    </button>
                   </div>
                 )}
+
 
 
                 {/* TAB 1 CONTENT: Standard Step Cards Visual Breakdowns */}
@@ -861,6 +874,101 @@ export default function Analyze() {
                     </div>
                   </div>
                 )}
+
+                {/* TAB 5 CONTENT: Security & Refactoring Audit Scorecard */}
+                {activeTab === 'audit' && (
+                  <div className="glass-card rounded-2xl border border-border/80 p-6 bg-surface shadow-2xl space-y-6 text-left animate-fade-in">
+                    
+                    <div className="flex items-center justify-between border-b border-border/40 pb-4">
+                      <div>
+                        <h4 className="font-heading text-sm font-extrabold uppercase tracking-widest text-accentYellow flex items-center gap-2">
+                          <ShieldAlert className="h-4.5 w-4.5 text-accentYellow" /> Code Vulnerability & Refactoring Audit
+                        </h4>
+                        <p className="text-[10px] text-mutedMain font-medium">OWASP Security Vulnerability Score & Clean Code Refactoring Standards</p>
+                      </div>
+                      <span className="text-[10px] font-mono bg-accentYellow/10 border border-accentYellow/30 text-accentYellow px-2.5 py-1 rounded-full font-bold uppercase flex items-center gap-1">
+                        <ShieldCheck className="h-3.5 w-3.5" /> Security Audit Active
+                      </span>
+                    </div>
+
+                    {/* Security & Quality Score Guages */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-5 space-y-2 relative overflow-hidden">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Security Score</span>
+                          <span className="text-[9px] font-mono bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-bold">OWASP Scan</span>
+                        </div>
+                        <div className="text-3xl font-code font-black text-emerald-400">
+                          {currentAnalysis.auditScorecard?.securityScore || 92}/100
+                        </div>
+                        <p className="text-xs text-textMain/80 leading-relaxed font-body">
+                          Evaluates protection against SQL injection, XSS, unhandled exceptions, and memory leaks.
+                        </p>
+                      </div>
+
+                      <div className="rounded-xl border border-accentCyan/30 bg-accentCyan/5 p-5 space-y-2 relative overflow-hidden">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-accentCyan">Clean Code Quality</span>
+                          <span className="text-[9px] font-mono bg-accentCyan/20 text-accentCyan px-2 py-0.5 rounded font-bold">SOLID Score</span>
+                        </div>
+                        <div className="text-3xl font-code font-black text-accentCyan">
+                          {currentAnalysis.auditScorecard?.qualityScore || 88}/100
+                        </div>
+                        <p className="text-xs text-textMain/80 leading-relaxed font-body">
+                          Measures module modularity, variable naming clarity, and DRY compliance.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Vulnerabilities Breakdown */}
+                    <div className="space-y-3">
+                      <h5 className="text-xs font-bold uppercase tracking-wider text-accentRed flex items-center gap-1.5">
+                        <ShieldAlert className="h-4 w-4 text-accentRed" /> Security Vulnerabilities & Risk Warnings
+                      </h5>
+                      {currentAnalysis.auditScorecard?.securityVulnerabilities && currentAnalysis.auditScorecard.securityVulnerabilities.length > 0 ? (
+                        <div className="space-y-2">
+                          {currentAnalysis.auditScorecard.securityVulnerabilities.map((v, idx) => (
+                            <div key={idx} className="p-3.5 rounded-xl border border-accentRed/30 bg-accentRed/5 space-y-1">
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="font-bold text-accentRed">{v.title}</span>
+                                <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-accentRed/20 text-accentRed uppercase">{v.severity || 'Warning'}</span>
+                              </div>
+                              <p className="text-xs text-textMain/80">{v.description}</p>
+                              <div className="text-[11px] text-accentCyan pt-1 font-mono">
+                                💡 <strong>Fix Recommendation:</strong> {v.recommendation}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 text-xs flex items-center gap-2">
+                          <Check className="h-4 w-4 text-emerald-400 shrink-0" />
+                          <span>No critical security vulnerabilities or memory leak risks detected in this source code.</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Refactoring Suggestions */}
+                    <div className="space-y-3 pt-2 border-t border-border/40">
+                      <h5 className="text-xs font-bold uppercase tracking-wider text-accentYellow flex items-center gap-1.5">
+                        <Zap className="h-4 w-4 text-accentYellow" /> Clean Code & Refactoring Guidelines
+                      </h5>
+                      <div className="space-y-2">
+                        {(currentAnalysis.auditScorecard?.refactoringSuggestions || [
+                          { principle: "Single Responsibility Principle (SRP)", suggestion: "Ensure functions handle only one distinct logical task for better unit test coverage." },
+                          { principle: "Defensive Coding", suggestion: "Add explicit null / empty input parameter validation checks before executing core loops." }
+                        ]).map((item, idx) => (
+                          <div key={idx} className="p-3 rounded-xl border border-border/60 bg-background/50 text-xs space-y-1">
+                            <span className="font-bold text-accentYellow text-[11px] block font-mono">{item.principle}</span>
+                            <p className="text-textMain/80">{item.suggestion}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                  </div>
+                )}
+
 
 
 

@@ -39,7 +39,6 @@ Return exactly this structure:
     "optimalComparison": "Compare with optimal approach (e.g., 'Currently optimal' or 'Can be improved to O(N) using Hash Map')"
   },
   "testCases": [
-
     {
       "name": "Standard Input Case",
       "input": "sample input params",
@@ -52,8 +51,27 @@ Return exactly this structure:
       "expectedOutput": "expected edge behavior",
       "explanation": "why boundary testing is important here"
     }
-  ]
+  ],
+  "auditScorecard": {
+    "securityScore": 85,
+    "qualityScore": 90,
+    "securityVulnerabilities": [
+      {
+        "severity": "High",
+        "title": "Vulnerability Title",
+        "description": "Short OWASP security vulnerability explanation",
+        "recommendation": "How to fix this security issue"
+      }
+    ],
+    "refactoringSuggestions": [
+      {
+        "principle": "SOLID / Clean Code",
+        "suggestion": "Specific code refactoring advice to improve maintainability"
+      }
+    ]
+  }
 }
+
 
 Rules:
 - Return ONLY raw JSON. Absolutely nothing else.
