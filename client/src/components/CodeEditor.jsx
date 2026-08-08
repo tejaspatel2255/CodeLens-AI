@@ -310,11 +310,11 @@ export default function CodeEditor({ onAnalyze, loading, activeLine }) {
             <div className="relative group">
               <button
                 disabled={converting}
-                className="px-2.5 py-1 rounded-lg bg-accentPurple/10 hover:bg-accentPurple/20 border border-accentPurple/30 text-accentPurple font-heading text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1 cursor-pointer disabled:opacity-40"
+                className="px-2 py-1 rounded-lg bg-accentPurple/10 hover:bg-accentPurple/20 border border-accentPurple/30 text-accentPurple font-heading text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1 cursor-pointer disabled:opacity-40"
                 title="Transpile code into another programming language"
               >
                 <RefreshCw className={`h-3 w-3 ${converting ? 'animate-spin' : ''}`} />
-                <span>Convert</span>
+                <span className="hidden sm:inline">Convert</span>
               </button>
               <div className="absolute right-0 top-full mt-1 w-36 bg-surface border border-border/80 rounded-xl shadow-2xl p-1 hidden group-hover:block z-30 animate-fade-in">
                 <span className="text-[9px] uppercase font-mono font-bold text-mutedMain px-2 py-1 block border-b border-border/40">Convert To:</span>
@@ -335,11 +335,11 @@ export default function CodeEditor({ onAnalyze, loading, activeLine }) {
           {/* Theme Selector Dropdown */}
           <div className="relative group">
             <button
-              className="px-2.5 py-1 rounded-lg bg-surface2/80 hover:bg-surface border border-border/80 text-textMain font-heading text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1 cursor-pointer"
+              className="px-2 py-1 rounded-lg bg-surface2/80 hover:bg-surface border border-border/80 text-textMain font-heading text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1 cursor-pointer"
               title="Change Editor Theme (Tokyo Night, Dracula, Monokai, One Dark Pro, GitHub Dark)"
             >
               <Palette className="h-3 w-3 text-accentYellow" />
-              <span>{activeTheme.name}</span>
+              <span className="hidden sm:inline">{activeTheme.name}</span>
             </button>
             <div className="absolute right-0 top-full mt-1 w-40 bg-surface border border-border/80 rounded-xl shadow-2xl p-1 hidden group-hover:block z-30 animate-fade-in">
               <span className="text-[9px] uppercase font-mono font-bold text-mutedMain px-2 py-1 block border-b border-border/40">Editor Themes:</span>
@@ -362,11 +362,12 @@ export default function CodeEditor({ onAnalyze, loading, activeLine }) {
 
           <button
             onClick={() => setIsScannerOpen(true)}
-            className="px-2.5 py-1 rounded-lg bg-accentCyan/10 hover:bg-accentCyan/20 border border-accentCyan/30 text-accentCyan font-heading text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1 cursor-pointer"
+            className="px-2 py-1 rounded-lg bg-accentCyan/10 hover:bg-accentCyan/20 border border-accentCyan/30 text-accentCyan font-heading text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1 cursor-pointer"
             title="Import .zip project or public GitHub repo"
           >
             <FolderArchive className="h-3 w-3" />
-            <span>Import Project</span>
+            <span className="hidden sm:inline">Import Project</span>
+            <span className="sm:hidden">Import</span>
           </button>
 
           <button

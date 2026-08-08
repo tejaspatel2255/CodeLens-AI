@@ -13,7 +13,7 @@ export default function App() {
   return (
     <AppProvider>
       <Router>
-        <div className="relative min-h-screen bg-background text-textMain flex flex-col">
+        <div className="relative min-h-screen bg-background text-textMain flex flex-col overflow-x-hidden max-w-full">
           {/* Global Navigation Header Bar */}
           <Navbar />
           
@@ -21,7 +21,7 @@ export default function App() {
           <HistorySidebar />
 
           {/* Content container mounting active routes */}
-          <main className="flex-grow w-full flex flex-col">
+          <main className="flex-grow w-full max-w-full flex flex-col overflow-x-hidden">
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/analyze" element={<Analyze />} />

@@ -59,8 +59,8 @@ export default function Generate() {
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 border-b border-border/40 pb-8">
           <div>
-            <h1 className="font-heading text-3xl font-black uppercase tracking-wide flex items-center gap-2">
-              <FileCode2 className="h-7 w-7 text-accentPurple" /> Code Generator
+            <h1 className="font-heading text-xl sm:text-2xl lg:text-3xl font-black uppercase tracking-wide flex items-center gap-2">
+              <FileCode2 className="h-6 w-6 sm:h-7 sm:w-7 text-accentPurple shrink-0" /> <span>Code Generator</span>
             </h1>
             <p className="text-xs text-mutedMain mt-1">
               Ask a programming question with constraints, and AI will generate optimized code.

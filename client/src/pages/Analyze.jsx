@@ -494,10 +494,10 @@ export default function Analyze() {
         {/* Workspace Title & Sharing Bar */}
         <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between mb-8 text-left">
           <div>
-            <h1 className="font-heading text-2xl font-black uppercase tracking-wide flex items-center gap-2">
-              <Terminal className="h-6 w-6 text-accentCyan" /> Debugging Dashboard
+            <h1 className="font-heading text-xl sm:text-2xl lg:text-3xl font-black uppercase tracking-wide flex items-center gap-2">
+              <Terminal className="h-5 w-5 sm:h-6 sm:w-6 text-accentCyan shrink-0" /> <span>Debugging Dashboard</span>
             </h1>
-            <p className="text-xs text-mutedMain">
+            <p className="text-xs text-mutedMain mt-0.5">
               Write, drop, or import code snippets to generate execution trees.
             </p>
           </div>

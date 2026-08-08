@@ -107,7 +107,7 @@ export default function Home() {
               {/* Spectacular Headline */}
               <motion.h1
                 variants={itemVariants}
-                className="font-heading text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl lg:text-5xl leading-tight text-textMain"
+                className="font-heading text-2xl sm:text-4xl md:text-5xl lg:text-5xl font-extrabold tracking-tight leading-tight text-textMain"
               >
                 Understand Code <br />
                 <span className="bg-gradient-to-r from-accentCyan via-textMain to-accentPurple bg-clip-text text-transparent">
