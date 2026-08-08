@@ -147,6 +147,115 @@ export default function Analyze() {
     printWindow.document.close();
   };
 
+  // 1. Export Markdown (.md) Generator
+  const handleExportMarkdown = () => {
+    if (!currentAnalysis) return;
+
+    let md = `# CodeLens AI — Execution Trace & Debugging Report\n\n`;
+    md += `**Generated:** ${new Date().toLocaleString()}\n`;
+    md += `**Language:** ${currentAnalysis.language || 'Detected'}\n`;
+    if (currentAnalysis.complexity) {
+      md += `**Time Complexity:** ${currentAnalysis.complexity.time || 'N/A'} | **Space Complexity:** ${currentAnalysis.complexity.space || 'N/A'}\n`;
+    }
+    md += `\n---\n\n`;
+
+    md += `## 1. Execution Flow Overview\n\n${currentAnalysis.flow || 'N/A'}\n\n`;
+
+    if (currentAnalysis.concepts && currentAnalysis.concepts.length > 0) {
+      const conceptNames = currentAnalysis.concepts.map(c => typeof c === 'string' ? c : c.name).filter(Boolean);
+      md += `**Core Concepts:** ${conceptNames.join(', ')}\n\n`;
+    }
+
+    md += `## 2. Original Source Code\n\n\`\`\`${(currentAnalysis.language || '').toLowerCase()}\n${currentAnalysis.original_code || ''}\n\`\`\`\n\n`;
+
+    if (currentAnalysis.bugs && currentAnalysis.bugs.length > 0) {
+      md += `## 3. Detected Defect Audit (${currentAnalysis.bugs.length})\n\n`;
+      currentAnalysis.bugs.forEach((b, i) => {
+        md += `### Bug #${i + 1}: ${b.issue}\n`;
+        md += `- **Buggy Line:** \`${b.line}\` \n`;
+        md += `- **Suggested Fix:** \`${b.fix}\` \n`;
+        md += `- **Analysis:** ${b.why || 'N/A'}\n\n`;
+      });
+    }
+
+    if (currentAnalysis.steps && currentAnalysis.steps.length > 0) {
+      md += `## 4. Step-by-Step Execution Breakdown\n\n`;
+      currentAnalysis.steps.forEach((s) => {
+        md += `### Step #${s.step}: ${s.title || 'Execution Frame'}\n`;
+        md += `- **Code Statement:** \`${s.line}\` \n`;
+        md += `- **Explanation:** ${s.explanation}\n`;
+        if (s.backend) md += `- **Under the Hood:** ${s.backend}\n`;
+        if (s.analogy) md += `- **Analogy:** *${s.analogy}*\n`;
+        md += `\n`;
+      });
+    }
+
+    const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `CodeLens_Report_${currentAnalysis.language || 'Code'}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast("Downloaded Markdown (.md) report!");
+  };
+
+  // 2. Export JSON Trace Dump Generator
+  const handleExportJSON = () => {
+    if (!currentAnalysis) return;
+    const jsonStr = JSON.stringify(currentAnalysis, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `codelens_trace_dump_${currentAnalysis.id || Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast("Downloaded JSON trace dump!");
+  };
+
+  // 3. Export Mermaid.js Diagram Markup Generator
+  const handleExportMermaid = () => {
+    if (!currentAnalysis || !currentAnalysis.steps || currentAnalysis.steps.length === 0) {
+      showToast("No trace steps available to build Mermaid diagram.");
+      return;
+    }
+
+    let mmd = `graph TD\n`;
+    mmd += `    Start(["🚀 Start Execution"]) --> Step1\n`;
+
+    currentAnalysis.steps.forEach((s, idx) => {
+      const stepId = `Step${idx + 1}`;
+      const titleClean = (s.title || `Step ${s.step}`).replace(/["\n\r]/g, "'");
+      const lineClean = (s.line || '').replace(/["\n\r]/g, "'");
+
+      mmd += `    ${stepId}["Step #${s.step}: ${titleClean}<br/><code>${lineClean}</code>"]\n`;
+
+      if (idx < currentAnalysis.steps.length - 1) {
+        const nextId = `Step${idx + 2}`;
+        mmd += `    ${stepId} --> ${nextId}\n`;
+      } else {
+        mmd += `    ${stepId} --> End(["🏁 End Execution"])\n`;
+      }
+    });
+
+    navigator.clipboard.writeText(mmd);
+    const blob = new Blob([mmd], { type: 'text/vnd.mermaid;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `codelens_flowchart_${currentAnalysis.id || Date.now()}.mmd`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast("Copied Mermaid markup & downloaded .mmd diagram!");
+  };
+
 
 
   // 1. Process Shared ID Query Parameter (?id=...) on Mount
@@ -396,14 +505,42 @@ export default function Analyze() {
           {/* Quick buttons */}
           <div className="flex items-center gap-2 flex-wrap">
             {currentAnalysis && (
-              <button
-                onClick={handleExportPDF}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-accentPurple/30 bg-accentPurple/10 hover:bg-accentPurple/20 text-xs font-semibold text-accentPurple uppercase tracking-widest transition-all cursor-pointer shadow-[0_0_15px_rgba(124,109,250,0.15)]"
-                title="Export report as PDF / Print document"
-              >
-                <Download className="h-4 w-4" />
-                <span>Export PDF</span>
-              </button>
+              <div className="relative group">
+                <button
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-accentPurple/40 bg-accentPurple/15 hover:bg-accentPurple/25 text-xs font-semibold text-accentPurple uppercase tracking-widest transition-all cursor-pointer shadow-[0_0_15px_rgba(124,109,250,0.15)]"
+                  title="Export analysis report in various formats"
+                >
+                  <Download className="h-4 w-4" />
+                  <span>Export Suite</span>
+                </button>
+                <div className="absolute right-0 top-full mt-1 w-52 bg-surface border border-border/80 rounded-xl shadow-2xl p-1.5 hidden group-hover:block z-40 animate-fade-in text-left">
+                  <span className="text-[9px] uppercase font-mono font-bold text-mutedMain px-2 py-1 block border-b border-border/40">Select Export Format:</span>
+                  <button
+                    onClick={handleExportPDF}
+                    className="w-full text-left px-3 py-2 rounded-lg text-xs font-heading font-bold text-textMain hover:bg-accentPurple/15 hover:text-accentPurple transition-colors cursor-pointer flex items-center gap-2"
+                  >
+                    <span>📄 PDF / Print Document</span>
+                  </button>
+                  <button
+                    onClick={handleExportMarkdown}
+                    className="w-full text-left px-3 py-2 rounded-lg text-xs font-heading font-bold text-textMain hover:bg-accentCyan/15 hover:text-accentCyan transition-colors cursor-pointer flex items-center gap-2"
+                  >
+                    <span>📝 Markdown Report (.md)</span>
+                  </button>
+                  <button
+                    onClick={handleExportJSON}
+                    className="w-full text-left px-3 py-2 rounded-lg text-xs font-heading font-bold text-textMain hover:bg-accentYellow/15 hover:text-accentYellow transition-colors cursor-pointer flex items-center gap-2"
+                  >
+                    <span>💾 JSON Trace Dump (.json)</span>
+                  </button>
+                  <button
+                    onClick={handleExportMermaid}
+                    className="w-full text-left px-3 py-2 rounded-lg text-xs font-heading font-bold text-textMain hover:bg-emerald-500/15 hover:text-emerald-400 transition-colors cursor-pointer flex items-center gap-2"
+                  >
+                    <span>📐 Mermaid.js Diagram (.mmd)</span>
+                  </button>
+                </div>
+              </div>
             )}
             {currentAnalysis && currentAnalysis.id && (
               <button

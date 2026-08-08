@@ -1,8 +1,56 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FileCode, Clipboard, Copy, Trash2, Check, Sparkles, Terminal, RefreshCw, FolderArchive, Layers } from 'lucide-react';
+import { FileCode, Clipboard, Copy, Trash2, Check, Sparkles, Terminal, RefreshCw, FolderArchive, Layers, Palette } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 import ProjectScannerModal from './ProjectScannerModal';
+
+const EDITOR_THEMES = {
+  'tokyo-night': {
+    name: 'Tokyo Night',
+    bg: 'bg-[#080c14]',
+    panelBg: 'bg-surface/50',
+    text: 'text-textMain',
+    accent: 'text-accentCyan',
+    activeLine: 'bg-accentCyan/15 text-accentCyan border-accentCyan',
+    border: 'border-border/80'
+  },
+  'dracula': {
+    name: 'Dracula',
+    bg: 'bg-[#282a36]',
+    panelBg: 'bg-[#44475a]/40',
+    text: 'text-[#f8f8f2]',
+    accent: 'text-[#ff79c6]',
+    activeLine: 'bg-[#ff79c6]/20 text-[#ff79c6] border-[#ff79c6]',
+    border: 'border-[#6272a4]/60'
+  },
+  'monokai': {
+    name: 'Monokai',
+    bg: 'bg-[#272822]',
+    panelBg: 'bg-[#3e3d32]/40',
+    text: 'text-[#f8f8f2]',
+    accent: 'text-[#a6e22e]',
+    activeLine: 'bg-[#a6e22e]/20 text-[#a6e22e] border-[#a6e22e]',
+    border: 'border-[#49483e]'
+  },
+  'one-dark-pro': {
+    name: 'One Dark Pro',
+    bg: 'bg-[#282c34]',
+    panelBg: 'bg-[#3e4451]/40',
+    text: 'text-[#abb2bf]',
+    accent: 'text-[#61afef]',
+    activeLine: 'bg-[#61afef]/20 text-[#61afef] border-[#61afef]',
+    border: 'border-[#4b5263]'
+  },
+  'github-dark': {
+    name: 'GitHub Dark',
+    bg: 'bg-[#0d1117]',
+    panelBg: 'bg-[#161b22]/60',
+    text: 'text-[#c9d1d9]',
+    accent: 'text-[#58a6ff]',
+    activeLine: 'bg-[#58a6ff]/20 text-[#58a6ff] border-[#58a6ff]',
+    border: 'border-[#30363d]'
+  }
+};
 
 const LANGUAGE_PILLS = [
 
@@ -17,6 +65,7 @@ export default function CodeEditor({ onAnalyze, loading, activeLine }) {
   const { currentAnalysis, setCurrentAnalysis, user, getApiUrl } = useApp();
   const navigate = useNavigate();
   const [code, setCode] = useState('');
+  const [theme, setTheme] = useState(() => localStorage.getItem('codelens_editor_theme') || 'tokyo-night');
   const [copied, setCopied] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [detectedLang, setDetectedLang] = useState('');
@@ -24,6 +73,14 @@ export default function CodeEditor({ onAnalyze, loading, activeLine }) {
   const [converting, setConverting] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const textareaRef = useRef(null);
+
+  const activeTheme = EDITOR_THEMES[theme] || EDITOR_THEMES['tokyo-night'];
+
+  const handleSelectTheme = (tKey) => {
+    setTheme(tKey);
+    localStorage.setItem('codelens_editor_theme', tKey);
+    showToast(`Editor theme changed to ${EDITOR_THEMES[tKey]?.name || tKey}`);
+  };
 
 
   const handleConvertCode = async (targetLang) => {
@@ -218,11 +275,11 @@ export default function CodeEditor({ onAnalyze, loading, activeLine }) {
       onDragOver={handleDrag}
       onDragLeave={handleDrag}
       onDrop={handleDrop}
-      className={`relative w-full rounded-2xl border transition-all duration-300 ${dragActive
-          ? 'border-accentCyan bg-accentCyan/5 shadow-[0_0_25px_rgba(0,245,196,0.15)]'
+      className={`relative w-full rounded-2xl border transition-all duration-300 ${activeTheme.bg} ${activeTheme.text} ${dragActive
+          ? 'border-accentCyan shadow-[0_0_25px_rgba(0,245,196,0.15)]'
           : code.trim()
-            ? 'border-accentCyan/45 bg-surface shadow-[0_0_20px_rgba(0,245,196,0.02)]'
-            : 'border-border bg-surface shadow-2xl'
+            ? `border-accentCyan/45 shadow-[0_0_20px_rgba(0,245,196,0.02)]`
+            : `${activeTheme.border} shadow-2xl`
         }`}
     >
       {/* Editor Header Tools */}
@@ -274,6 +331,34 @@ export default function CodeEditor({ onAnalyze, loading, activeLine }) {
               </div>
             </div>
           )}
+
+          {/* Theme Selector Dropdown */}
+          <div className="relative group">
+            <button
+              className="px-2.5 py-1 rounded-lg bg-surface2/80 hover:bg-surface border border-border/80 text-textMain font-heading text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1 cursor-pointer"
+              title="Change Editor Theme (Tokyo Night, Dracula, Monokai, One Dark Pro, GitHub Dark)"
+            >
+              <Palette className="h-3 w-3 text-accentYellow" />
+              <span>{activeTheme.name}</span>
+            </button>
+            <div className="absolute right-0 top-full mt-1 w-40 bg-surface border border-border/80 rounded-xl shadow-2xl p-1 hidden group-hover:block z-30 animate-fade-in">
+              <span className="text-[9px] uppercase font-mono font-bold text-mutedMain px-2 py-1 block border-b border-border/40">Editor Themes:</span>
+              {Object.entries(EDITOR_THEMES).map(([tKey, tObj]) => (
+                <button
+                  key={tKey}
+                  onClick={() => handleSelectTheme(tKey)}
+                  className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-code flex items-center justify-between transition-colors cursor-pointer ${
+                    theme === tKey
+                      ? 'bg-accentCyan/15 text-accentCyan font-bold'
+                      : 'text-textMain hover:bg-surface2/60'
+                  }`}
+                >
+                  <span>{tObj.name}</span>
+                  {theme === tKey && <Check className="h-3 w-3 text-accentCyan" />}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <button
             onClick={() => setIsScannerOpen(true)}
