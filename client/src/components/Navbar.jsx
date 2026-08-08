@@ -28,17 +28,17 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-40 w-full glass-card border-t-0 border-x-0 border-b border-border/80 backdrop-blur-md">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo / Branding */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center gap-2.5 group">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-accentCyan to-accentPurple p-[1px] shadow-lg shadow-accentCyan/20 transition-all duration-300 group-hover:scale-105">
+            <Link to="/" className="flex items-center gap-2 sm:gap-2.5 group">
+              <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-gradient-to-br from-accentCyan to-accentPurple p-[1px] shadow-lg shadow-accentCyan/20 transition-all duration-300 group-hover:scale-105">
                 <div className="flex h-full w-full items-center justify-center rounded-[11px] bg-background/90 overflow-hidden backdrop-blur-sm p-1">
                   <img src="/codelens_logo.svg" alt="CodeLens Logo" className="h-full w-full object-contain transition-transform group-hover:scale-110" />
                 </div>
               </div>
-              <span className="font-heading text-xl font-extrabold tracking-wide bg-gradient-to-r from-accentCyan via-textMain to-accentPurple bg-clip-text text-transparent group-hover:opacity-90 transition-opacity">
+              <span className="font-heading text-base sm:text-xl font-extrabold tracking-wide bg-gradient-to-r from-accentCyan via-textMain to-accentPurple bg-clip-text text-transparent group-hover:opacity-90 transition-opacity">
                 CodeLens <span className="text-accentCyan font-body font-light">AI</span>
               </span>
             </Link>

@@ -60,21 +60,23 @@ export default function ChatAssistant({ codeContext }) {
 
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 font-body text-left">
+    <div className="fixed bottom-4 right-3 left-3 sm:left-auto sm:right-6 sm:bottom-6 z-50 font-body text-left">
       {/* Floating Toggle Button */}
       {!open && (
-        <button
-          onClick={() => setOpen(true)}
-          className="flex items-center gap-2.5 px-4 py-3 rounded-full bg-gradient-to-r from-accentCyan to-accentPurple text-background font-heading font-black text-xs uppercase tracking-wider shadow-[0_0_25px_rgba(0,245,196,0.35)] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
-        >
-          <MessageSquare className="h-4 w-4 fill-current" />
-          <span>Ask CodeLens AI</span>
-        </button>
+        <div className="flex justify-end">
+          <button
+            onClick={() => setOpen(true)}
+            className="flex items-center gap-2.5 px-4 py-3 rounded-full bg-gradient-to-r from-accentCyan to-accentPurple text-background font-heading font-black text-xs uppercase tracking-wider shadow-[0_0_25px_rgba(0,245,196,0.35)] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
+          >
+            <MessageSquare className="h-4 w-4 fill-current" />
+            <span>Ask CodeLens AI</span>
+          </button>
+        </div>
       )}
 
       {/* Floating Chat Drawer Window */}
       {open && (
-        <div className="w-[360px] sm:w-[420px] h-[520px] rounded-2xl glass-card border border-accentCyan/30 bg-surface/95 shadow-2xl flex flex-col overflow-hidden animate-fade-in">
+        <div className="w-full sm:w-[420px] h-[480px] sm:h-[520px] max-h-[80vh] rounded-2xl glass-card border border-accentCyan/30 bg-surface/95 shadow-2xl flex flex-col overflow-hidden animate-fade-in">
           {/* Header */}
           <div className="p-4 border-b border-border/80 bg-surface2/60 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
